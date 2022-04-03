@@ -13,7 +13,8 @@ class Button(Buttons):
     pos: (left, top) - The topleft position before scaling.
     size: (width, height) - The size before scaling.
     text: str -
-    mode: str - "Count": Count the number of inputs that have occured.
+    mode: str - "None": Does not change *.value when clicked. Will set *.clicked and execute any assigned functions.
+              - "Count": Count the number of inputs that have occured.
               - "Toggle": Toggle value from True to False and back.
               - "Hold": Stays True until the Mouse Button is released.
     orientation: int - The orientation of the text. If orientation == 0, the text will be horizontal; if orientation == 1, the text will be vertical.
@@ -41,7 +42,7 @@ class Button(Buttons):
     actions = ["LMB_down", "LMB_up", "RMB_down", "Set_cursor_pos"]
     def __init__(self, pos, size,
                  text = "",
-                 mode = "Count",
+                 mode = "None",
                  orientation = 0,
                  style = "Square",
                  font_name = pygame.font.get_default_font(),
@@ -67,7 +68,7 @@ class Button(Buttons):
             raise TypeError(f"mode must be type 'str', not type {type(mode).__name__}")
         elif mode.lower() == "count":
             self.value = 0
-        elif mode.lower() in ("toggle", "hold"):
+        elif mode.lower() in ("none", "toggle", "hold"):
             self.value = False
         else:
             raise ValueError(f"Unsupported button mode '{mode}'")
@@ -92,7 +93,9 @@ class Button(Buttons):
     def LMB_down(self, pos):
         if self.contains(pos):
             self.clicked = True
-            if self.mode == "count":
+            if self.mode == "none": #Just here for consistency / clarity. Does nothing.
+                pass
+            elif self.mode == "count":
                 self.value += 1
             elif self.mode == "toggle":
                 self.value = not self.value

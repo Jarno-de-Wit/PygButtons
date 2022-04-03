@@ -24,7 +24,7 @@ def Main():
     #Setup of the Buttons - Note: The name of the button variables is not
     # important. You could also store them in a list, or not store them anywhere
     # at all, and just use the Buttons' groups to organise all buttons
-    button_quit = Button((450, 450), (100, 50), text = "Quit")
+    button_quit = Button((450, 450), (100, 50), text = "Quit", mode = "Count")
 
     button_count = Button((50, 25 ), (200, 50), text = "0", mode = "Count")
     button_toggle = Button((50, 100), (200, 50), text = "Toggle", mode = "Toggle")
