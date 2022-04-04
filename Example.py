@@ -26,7 +26,7 @@ def Main():
     # at all, and just use the Buttons' groups to organise all buttons
     button_quit = Button((450, 450), (100, 50), text = "Quit", mode = "Count")
 
-    button_count = Button((50, 25 ), (200, 50), text = "0", mode = "Count")
+    button_count = Button((50, 25 ), (200, 50), text = "Count", mode = "Count")
     button_toggle = Button((50, 100), (200, 50), text = "Toggle", mode = "Toggle")
     button_hold = Button((50, 175), (200, 50), text = "Hold", mode = "Hold")
 
@@ -44,7 +44,8 @@ def Main():
         Handle_input()
         if button_quit.clicked:
             running = False
-
+        if button_count.clicked:
+            button_count.text = str(button_count.value)
 
         #Perform updates on the Buttons
         Buttons.Update(all)
