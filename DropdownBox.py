@@ -23,7 +23,7 @@ class DropdownBox(Buttons):
     font_size: int - The size (in px) of the text.
     text_colour: (R, G, B) - The colour of the text in the DropdownBox.
     scroll_bar: None, int, Slider - The type of scrollbar to be included. Default styles 1 and 2 are available.
-    background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected. If a function is given, it will be called in Make_background as function(self).
+    background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected. If a function is given, it will be called in Make_background as 'function(self)'.
     border: ((R, G, B), width, offset), None - The border that appears around the buttons in the DropdownBox.
     accent background: pygame.Surface, (R, G, B), None, function - The background of the button if it is_selected. If set to None, will be the same as normal background.
     dropdown_background: pygame.Surface, (R, G, B), None, function - The background that is rendered behind the buttons on the dropdown section of the DropdownBox.

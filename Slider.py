@@ -22,7 +22,7 @@ class Slider(Buttons):
     edge_markings: bool - Whether or not markings should be present at the edges too, or should be spaced equally over the entire text_box. Can not be enabled when markings < 2.
     marking_colour: (R, G, B) - The colour the markings will have when drawn onto the Slider background.
     snap_radius: int, float - The radius (in pixels) in which the slider should snap towards any markings.
-    slider_background: pygame.Surface, (R, G, B), None, function - The background of the slider if it is not selected. If a function is given, it will be called in Make_background as function(self).
+    slider_background: pygame.Surface, (R, G, B), None, function - The background of the slider if it is not selected. If a function is given, it will be called in Make_background as 'function(self)'.
     slider_border: ((R, G, B), width, offset), None - The border that appears around the slider.
     accent background: pygame.Surface, (R, G, B), None, function - The background of the slider if it is_selected. If set to None, will be the same as normal background.
     slider_feature_font: str - The name of the font that should be used for the slider feature. Must lead to a valid font when used in pygame.font.Font().

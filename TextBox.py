@@ -19,7 +19,7 @@ class TextBox(Buttons):
     text_colour: (R, G, B) - The colour of the text the user types.
     hint_colour: (R, G, B) - The colour of the hint.
     text_offset: "auto", int, (x, y) - The offset the text should have from the sides of the TextBox. Prevents the text from overlapping with borders, and touching the edges.
-    background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected. If a function is given, it will be called in Make_background as function(self).
+    background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected. If a function is given, it will be called in Make_background as 'function(self)'.
     border: ((R, G, B), width, offset), None - The border that appears around the TextBox.
     accent background: pygame.Surface, (R, G, B), None, function - The background of the button if it is_selected. If set to None, will be the same as normal background.
     accent_border: ((R, G, B), width, offset), None - An additional border that can be drawn when the TextBox is selected.

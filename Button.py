@@ -22,7 +22,7 @@ class Button(Buttons):
     font_name: str - The name of the font that should be used for the Button. Must lead to a valid font when used in pygame.font.Font().
     font_size: int - The size (in px) of the text.
     text_colour: (R, G, B) - The colour of the text the user types.
-    background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected. If a function is given, it will be called in Make_background as function(self).
+    background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected. If a function is given, it will be called in Make_background as 'function(self)'.
     border: ((R, G, B), width, offset), None - The border that appears around the TextBox.
     accent background: pygame.Surface, (R, G, B), None, function - The background of the Button if *.value. If set to None, will be the same as normal background.
     dragable: (horizotal, vertical) - A tuple of two booleans defining whether the Button is allowed to be moved in either the horizontal and / or vertical direction repectively.

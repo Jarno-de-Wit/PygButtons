@@ -19,7 +19,7 @@ class Text(Buttons):
     text_colour: (R, G, B) - The colour of the text in the Text object.
     text_offset: "auto", int, (x, y) - The offset the text should have from the sides of the Text object. Prevents the text from overlapping with borders, and touching the edges.
     scroll_bar: None, int, Slider - The type of scrollbar to be included. Default styles 1 and 2 are available.
-    background: pygame.Surface, (R, G, B), None, function - The background of the button. If a function is given, it will be called in Make_background as function(self).
+    background: pygame.Surface, (R, G, B), None, function - The background of the button. If a function is given, it will be called in Make_background as 'function(self)'.
     border: ((R, G, B), width, offset), None - The border that appears around the TextBox.
     func_data: dict - Contains potential additional data for use by custom background drawing functions.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
