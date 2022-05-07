@@ -174,7 +174,7 @@ class Button(Buttons):
             #Clear self.updated again, as the surface has been remade.
             self.updated = False
         screen.blit(self.surface, self.scaled(self.topleft))
-        return()
+        return
 
     @property
     def text(self):
