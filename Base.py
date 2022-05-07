@@ -112,7 +112,7 @@ class Buttons():
         Add a button to a group.
         Allows for assignment of multiple groups simultaniously by passing in a list or tuple of groups.
         """
-        if type(groups) not in (list, tuple):
+        if not isinstance(groups, (list, tuple)):
             groups = [groups]
         for grp in groups:
             if grp is None:
@@ -302,12 +302,15 @@ class Buttons():
 
 
     @classmethod
-    def Scale(cls, scale, group = all, relative_scale = True):
+    def Scale(cls, scale, group = all, relative_scale = True, *, center = None, scaled_center = None):
         """
         Scales all buttons in the given group by / to a certain scaling factor.
         """
         if not isinstance(scale, (float, int)):
             raise TypeError(f"scale must be type 'int' or 'float', not type '{type(scale).__name__}'")
+        if center is not None and scaled_center is not None:
+            raise ValueError(f"Cannot define both 'center' and 'scaled_center' for Scale")
+
         for button in cls.get_group(group):
             if relative_scale:
                 button.scale *= scale
@@ -375,7 +378,6 @@ class Buttons():
             return True
         else:
             return False
-
 
 
     @classmethod
@@ -456,7 +458,7 @@ class Buttons():
         """
         A function that verifies whether a given iterable has the required length, and whether all items in the iterable are of the correct types.
         """
-        if not(hasattr(value, "__iter__")):
+        if not hasattr(value, "__iter__"):
             raise ValueError("Given value is not iterable")
         value_iterator = value.__iter__()
         #Get the first {length} items from the iterator.
@@ -501,7 +503,7 @@ class Buttons():
         if border:
             cls.Verify_iterable(border, 3)
             border_colour = cls.Verify_colour(border[0])
-            if not all(type(i) in [int, float] for i in border[1:]):
+            if not all(isinstance(i, (int, float)) for i in border[1:]):
                 raise TypeError("Border width and Border offset must be type 'int' or 'float'")
             return border_colour, border[1], border[2]
         else:
@@ -513,7 +515,7 @@ class Buttons():
         """
         Verifies whether a background is of a correct format / contains valid values.
         """
-        if type(background) is pygame.Surface: #Pre-existing surface
+        if isinstance(background, pygame.Surface): #Pre-existing surface
             return background
         elif not background: #Empty background
             return(None)
@@ -722,43 +724,43 @@ class Buttons():
         self.width, self.height = value
     @bottom.setter
     def bottom(self, value):
-        if not type(value) in (int, float):
+        if not isinstance(value, (int, float)):
             raise TypeError(f"'bottom' must by type 'int' or 'float', not type '{type(value).__name__}'")
         self.__top = value - self.height
     @top.setter
     def top(self, value):
-        if not type(value) in (int, float):
+        if not isinstance(value, (int, float)):
             raise TypeError(f"'top' must by type 'int' or 'float', not type '{type(value).__name__}'")
         self.__top = value
     @left.setter
     def left(self, value):
-        if not type(value) in (int, float):
+        if not isinstance(value, (int, float)):
             raise TypeError(f"'left' must by type 'int' or 'float', not type '{type(value).__name__}'")
         self.__left = value
     @right.setter
     def right(self, value):
-        if not type(value) in (int, float):
+        if not isinstance(value, (int, float)):
             raise TypeError(f"'right' must by type 'int' or 'float', not type '{type(value).__name__}'")
         self.__left = value - self.width
     @centerx.setter
     def centerx(self, value):
-        if not type(value) in (int, float):
+        if not isinstance(value, (int, float)):
             raise TypeError(f"'centerx' must by type 'int' or 'float', not type '{type(value).__name__}'")
         self.__left = value - self.width / 2
     @centery.setter
     def centery(self, value):
-        if not type(value) in (int, float):
+        if not isinstance(value, (int, float)):
             raise TypeError(f"'centery' must by type 'int' or 'float', not type '{type(value).__name__}'")
         self.__top = value - self.height / 2
     @width.setter
     def width(self, value):
-        if not type(value) in (int, float):
+        if not isinstance(value, (int, float)):
             raise TypeError(f"'width' must by type 'int' or 'float', not type '{type(value).__name__}'")
         self.__width = value
         self.updated = True
     @height.setter
     def height(self, value):
-        if not type(value) in (int, float):
+        if not isinstance(value, (int, float)):
             raise TypeError(f"'height' must by type 'int' or 'float', not type '{type(value).__name__}'")
         self.__height = value
         self.updated = True
@@ -782,9 +784,9 @@ class Buttons():
         """
         Returns the scaled version of a value, or tuple of values.
         """
-        if type(value) in (list, tuple):
-            return(tuple(self.scaled(i, rounding) for i in value)) #Recursion is amazing!
-        elif type(value) in (float, int):
+        if isinstance(value, (list, tuple)):
+            return tuple(self.scaled(i, rounding) for i in value) #Recursion is amazing!
+        elif isinstance(value, (float, int)):
             if rounding:
                 return round(value * self.scale)
             else:
