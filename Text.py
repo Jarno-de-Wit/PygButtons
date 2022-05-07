@@ -81,6 +81,8 @@ class Text(Buttons):
         self.__scrolled = 0
         self.Build_lines()
         self.func_data = func_data
+        for child in self.children:
+            child._move = lambda *args: None
         self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are set-up correctly
 
 
@@ -112,6 +114,10 @@ class Text(Buttons):
         self.scrolled += value
         self.Buttons.input_claim = True
         self.Buttons.input_processed = True
+
+
+    def Move(self, offset, scale = False):
+        super().Move(offset, self, scale)
 
 
     def Draw(self, screen):

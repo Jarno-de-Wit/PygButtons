@@ -111,6 +111,9 @@ class DropdownBox(Buttons):
         #Add in all the options
         for option in options:
             self.Add_option(option)
+        for child in self.children:
+            child._move = lambda *args: None
+        self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are set-up correctly
 
 
     def LMB_down(self, pos):
@@ -165,6 +168,10 @@ class DropdownBox(Buttons):
             elif self.is_within(pos, self.scaled((self.left, self.bottom + self.spacing[1])), self.scaled((self.right - (self.scroll_bar.width + self.spacing[0] if self.scroll_bar else 0), self.bottom + self._display_pixel_length + self.spacing[1]))): #If the position lies withing the expanded section, perform scrolling.
                 self.scrolled += value
                 self.Buttons.input_claim = True
+
+
+    def Move(self, offset, scale = False):
+        super().Move(offset, self, scale)
 
 
     def Draw(self, screen):
@@ -254,7 +261,7 @@ class DropdownBox(Buttons):
                 self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(len(self.options), self.display_length) / len(self.options)))
             else:
                 self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(1, -self.display_length / len(self.options))))
-            self.scroll_bar.slider.limits = self.scroll_bar.slider.limits[:2] + (0, self._display_pixel_length)
+            self.scroll_bar.slider.limits = self.scroll_bar.slider.limits[:2] + [0, self._display_pixel_length]
             self.scroll_bar.value_range = (0, max(0, len(self.options) * (self.height + self.spacing[1]) - self.spacing[1]) - self._display_pixel_length)
         return
 
@@ -308,7 +315,7 @@ class DropdownBox(Buttons):
                 self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(len(self.options), self.display_length) / len(self.options)))
             else:
                 self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(1, -self.display_length / len(self.options))))
-            self.scroll_bar.slider.limits = self.scroll_bar.slider.limits[:2] + (0, self._display_pixel_length)
+            self.scroll_bar.slider.limits = self.scroll_bar.slider.limits[:2] + [0, self._display_pixel_length]
             self.scroll_bar.value_range = (0, max(0, len(self.options) * (self.height + self.spacing[1]) - self.spacing[1]) - self._display_pixel_length)
 
         return True

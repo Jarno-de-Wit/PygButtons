@@ -84,7 +84,7 @@ class Button(Buttons):
         self.border = self.Verify_border(border)
         self.dragable = self.Verify_iterable(dragable, 2, bool)
         limits = self.Verify_iterable(limits, 4)
-        self.limits = tuple(value if value else ( (-1) ** (i + 1) * math.inf) for i, value in enumerate(limits))
+        self.limits = list(value if value else ( (-1) ** (i + 1) * math.inf) for i, value in enumerate(limits))
         self.snap = self.Verify_iterable(snap, 3)
         self.func_data = func_data
         self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are prepared and set-up correctly
@@ -142,6 +142,10 @@ class Button(Buttons):
                 self.top = self.Clamp(top, self.limits[2], self.limits[3] - self.height)
 
 
+    def Move(self, offset, scale = False):
+        super().Move(offset, self, scale)
+
+
     def Draw(self, screen):
         """
         Draw the button to the screen.
@@ -175,6 +179,18 @@ class Button(Buttons):
             self.updated = False
         screen.blit(self.surface, self.scaled(self.topleft))
         return
+
+    def _move(self, value):
+        self.left += value[0]
+        self.top += value[1]
+        self.limits[0] += value[0]
+        self.limits[1] += value[0]
+        self.limits[2] += value[1]
+        self.limits[3] += value[1]
+        for child in self.children:
+            child._move(value)
+
+
 
     @property
     def text(self):

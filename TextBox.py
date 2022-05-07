@@ -94,6 +94,8 @@ class TextBox(Buttons):
         self.is_selected = False
         self.deselected = False
         self.func_data = func_data
+        for child in self.children:
+            child._move = lambda *args: None
         self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are set-up correctly
 
 
@@ -163,6 +165,10 @@ class TextBox(Buttons):
         self.Buttons.input_processed = True
 
         return
+
+
+    def Move(self, offset, scale = False):
+        super().Move(offset, self, scale)
 
 
     def Draw(self, screen):

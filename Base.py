@@ -22,6 +22,7 @@ class Buttons():
     Buttons.Update(group) - Updates all Buttons in the given group wherever necessary, such as updating the current cursor position for active sliders. Should be called once at the end of each input / event cycle.
     Buttons.Draw(screen, group) - Draw all Buttons in the given group(s) to the given screen / pygame.Surface
     Buttons.Scale(scale, group) - Scales all Buttons in the given group to / by the given factor.
+    Buttons.Move(offset, group) - Moves all Buttons in the given group by the given offset.
 
     Other Actions (automatically called by Buttons.Event() / Buttons.Update() when required):
     Buttons.LMB_down(pos, group) - Perform a LMB_down (normal mouse click) at a certain position.
@@ -92,12 +93,17 @@ class Buttons():
                         #Append all buttons in the group to the original group, if it is not a duplicate
                         if button not in lst:
                             lst.append(button)
+                #Else, if the group is already a Button, append that Button to the list instead
+                elif isinstance(grp, Buttons):
+                    lst.append(grp)
             return lst
         #Select the correct button group
         elif group is all: #If the group is the default 'all', return all buttons
             return cls.list_all
         elif group in cls.groups:
             return cls.groups[group] #Return all buttons in the group.
+        elif isinstance(group, Buttons):
+            return [group]
         else: #If the group doesn't exist, return an empty list
             return []
 
@@ -150,7 +156,7 @@ class Buttons():
         #Reset the input_claim and input_processed attributes
         cls.input_claim = False
         cls.input_processed = False
-        
+
         #Handle the Event appropriately
         if type(event) != pygame.event.EventType:
             raise TypeError(f"Event should be type 'Event', not type {type(event).__name__}")
@@ -306,6 +312,27 @@ class Buttons():
             else:
                 button.scale = scale
 
+    @classmethod
+    def Move(cls, offset, group = all, scale = False):
+        """
+        Moves all buttons in the given group by a certain offset.
+
+        offset: int / float / tuple - An number, or iterable containing two numbers, for how much the Buttons in the group should be moved. If a number is given, this movement is applied in both directions.
+        group: * - The group to which the translation should be applied.
+        scale: bool - Determines whether the given values should be scaled to the Buttons' scale before they are applied.
+        """
+        if hasattr(offset, "__iter__"):
+            cls.Verify_iterable(offset, 2, (int, float))
+        else:
+            offset = (offset, offset)
+        #Set the "button_offset" variable to prevent scaling to affect other buttons too.
+        b_offset = offset
+
+        for button in cls.get_group(group):
+            if scale:
+                b_offset = button.scaled(offset, False)
+            button._move(b_offset)
+
 
     @classmethod
     def Draw(cls, screen, group = all):
@@ -436,10 +463,10 @@ class Buttons():
         #If the iterator doesn't contain enough items, raise a ValueError
         except RuntimeError:
             raise ValueError("Given iterable contains too few items")
-        if type(data_types) in (type, type(None)):
+        if isinstance(data_types, (type, type(None))):
             data_types = [data_types]
         #If data_types == None,    or    all ites are of an allowed data_type: everything is fine; Else, raise an error.
-        if not (data_types[0] == None    or    all(type(item) in data_types for item in output)):
+        if not (data_types[0] is None    or    all(type(item) in data_types for item in output)):
             raise TypeError(f"Incorrect data type for items in iterable")
         #Test if the iterator did not contain more items:
         try:
@@ -523,6 +550,13 @@ class Buttons():
         self.updated = True
         for child in self.children:
             child.scale = value
+
+
+    def _move(self, value):
+        self.left += value[0]
+        self.top += value[1]
+        for child in self.children:
+            child._move(value)
 
 
     @property

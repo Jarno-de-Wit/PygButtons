@@ -143,6 +143,10 @@ class Slider(Buttons):
                 self._moved = True
 
 
+    def Move(self, offset, scale = False):
+        super().Move(offset, self, scale)
+
+
     def Draw(self, screen):
         """
         Draw the button to the screen.
