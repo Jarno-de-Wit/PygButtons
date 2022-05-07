@@ -14,4 +14,7 @@ from DropdownBox import DropdownBox
 from Text import Text
 
 #Remove the path that has been added as to not contaminate the namespace
-sys.path.pop(0)
+sys.path.remove(path)
+
+#Delete the path variable again to prevent accidental namespace cluttering
+del path
