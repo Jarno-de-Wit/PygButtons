@@ -142,6 +142,10 @@ class Button(Buttons):
                 self.top = self.Clamp(top, self.limits[2], self.limits[3] - self.height)
 
 
+    def Scale(self, scale, relative_scale = True):
+        super().Scale(scale, self, relative_scale)
+
+
     def Move(self, offset, scale = False):
         super().Move(offset, self, scale)
 

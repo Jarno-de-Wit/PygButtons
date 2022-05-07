@@ -306,6 +306,8 @@ class Buttons():
         """
         Scales all buttons in the given group by / to a certain scaling factor.
         """
+        if not isinstance(scale, (float, int)):
+            raise TypeError(f"scale must be type 'int' or 'float', not type '{type(scale).__name__}'")
         for button in cls.get_group(group):
             if relative_scale:
                 button.scale *= scale

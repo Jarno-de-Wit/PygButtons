@@ -116,6 +116,10 @@ class Text(Buttons):
         self.Buttons.input_processed = True
 
 
+    def Scale(self, scale, relative_scale = True):
+        super().Scale(scale, self, relative_scale)
+
+
     def Move(self, offset, scale = False):
         super().Move(offset, self, scale)
 

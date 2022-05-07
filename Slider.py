@@ -143,6 +143,10 @@ class Slider(Buttons):
                 self._moved = True
 
 
+    def Scale(self, scale, relative_scale = True):
+        super().Scale(scale, self, relative_scale)
+
+
     def Move(self, offset, scale = False):
         super().Move(offset, self, scale)
 
