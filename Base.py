@@ -302,16 +302,36 @@ class Buttons():
 
 
     @classmethod
-    def Scale(cls, scale, group = all, relative_scale = True, *, center = None, scaled_center = None):
+    def Scale(cls, scale, group = all, relative_scale = True, *, center = (0, 0), scaled_center = None):
         """
         Scales all buttons in the given group by / to a certain scaling factor.
+
+        relative_scale: bool - Determines whether the given scale value is absolute (Button.scale = val), or is a scaling factor relative to their current scale.
+        center: tuple - The absolute coordinates around which the scaling should take place.
+        scaled_center: Tuple - The display coordinates around which the scaling should take place. If these are passed in, the 'center' coordinates are ignored.
         """
         if not isinstance(scale, (float, int)):
             raise TypeError(f"scale must be type 'int' or 'float', not type '{type(scale).__name__}'")
-        if center is not None and scaled_center is not None:
-            raise ValueError(f"Cannot define both 'center' and 'scaled_center' for Scale")
+        elif scale == 0:
+            raise ValueError(f"Cannot scale buttons to scale '0'")
+
+        if scaled_center:
+            scaled_center = cls.Verify_iterable(scaled_center, 2)
+        else:
+            center = cls.Verify_iterable(center, 2)
+
+        #Set the scale factor required for setting the Buttons' new position (after scaling around a certain point)
+        scale_factor = 1 / scale
 
         for button in cls.get_group(group):
+            if not relative_scale:
+                scale_factor = button.scale / scale
+            if scaled_center:
+                center = tuple(i / button.scale for i in scaled_center)
+
+            # Apply the translation to make sure the given coordinates stay at the same place
+            button.topleft = cls.offset(button.topleft, center, 2 * (scale_factor - 1,))
+
             if relative_scale:
                 button.scale *= scale
             else:
