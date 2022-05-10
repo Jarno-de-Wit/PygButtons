@@ -579,8 +579,6 @@ class Buttons():
     def _move(self, value):
         self.left += value[0]
         self.top += value[1]
-        for child in self.children:
-            child._move(value)
 
 
     @property
@@ -746,7 +744,7 @@ class Buttons():
     def bottom(self, value):
         if not isinstance(value, (int, float)):
             raise TypeError(f"'bottom' must by type 'int' or 'float', not type '{type(value).__name__}'")
-        self.__top = value - self.height
+        self.top = value - self.height
     @top.setter
     def top(self, value):
         if not isinstance(value, (int, float)):
@@ -761,17 +759,17 @@ class Buttons():
     def right(self, value):
         if not isinstance(value, (int, float)):
             raise TypeError(f"'right' must by type 'int' or 'float', not type '{type(value).__name__}'")
-        self.__left = value - self.width
+        self.left = value - self.width
     @centerx.setter
     def centerx(self, value):
         if not isinstance(value, (int, float)):
             raise TypeError(f"'centerx' must by type 'int' or 'float', not type '{type(value).__name__}'")
-        self.__left = value - self.width / 2
+        self.left = value - self.width / 2
     @centery.setter
     def centery(self, value):
         if not isinstance(value, (int, float)):
             raise TypeError(f"'centery' must by type 'int' or 'float', not type '{type(value).__name__}'")
-        self.__top = value - self.height / 2
+        self.top = value - self.height / 2
     @width.setter
     def width(self, value):
         if not isinstance(value, (int, float)):

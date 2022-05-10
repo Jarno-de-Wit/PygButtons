@@ -111,8 +111,6 @@ class DropdownBox(Buttons):
         #Add in all the options
         for option in options:
             self.Add_option(option)
-        for child in self.children:
-            child._move = lambda *args: None
         self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are set-up correctly
 
 

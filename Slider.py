@@ -302,6 +302,22 @@ class Slider(Buttons):
     def moved(self, value):
         self.__moved = value
 
+    @property
+    def left(self):
+        return super().left
+    @property
+    def top(self):
+        return super().top
+    @left.setter
+    def left(self, value):
+        try: self.slider._move((value - self.left, 0))
+        except AttributeError: pass
+        self.Buttons.left.fset(self, value)
+    @top.setter
+    def top(self, value):
+        try: self.slider._move((0, value - self.top))
+        except AttributeError: pass
+        self.Buttons.top.fset(self, value)
 
 
 def Make_slider(self, style, size, background, accent_background, border, markings, edge_markings, snap_radius, feature_text, feature_colour, feature_font, feature_size, orientation):

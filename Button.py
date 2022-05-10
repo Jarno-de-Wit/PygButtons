@@ -191,8 +191,6 @@ class Button(Buttons):
         self.limits[1] += value[0]
         self.limits[2] += value[1]
         self.limits[3] += value[1]
-        for child in self.children:
-            child._move(value)
 
 
 
