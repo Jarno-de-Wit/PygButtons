@@ -302,7 +302,7 @@ class Slider(Buttons):
     def moved(self, value):
         self.__moved = value
 
-    @property
+    @property #Properties required to be able to overwrite setters
     def left(self):
         return super().left
     @property
@@ -310,13 +310,13 @@ class Slider(Buttons):
         return super().top
     @left.setter
     def left(self, value):
-        try: self.slider._move((value - self.left, 0))
-        except AttributeError: pass
-        self.Buttons.left.fset(self, value)
+        try: self.slider._move((value - self.left, 0)) #Move the slider along with the main Slider's body
+        except AttributeError: pass #Catch error raised when .left is first set in __init__
+        self.Buttons.left.fset(self, value) #Pass the value on to the base class' setter
     @top.setter
     def top(self, value):
         try: self.slider._move((0, value - self.top))
-        except AttributeError: pass
+        except AttributeError: pass #Catch error raised when .top is first set in __init__
         self.Buttons.top.fset(self, value)
 
 
