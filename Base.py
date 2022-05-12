@@ -427,10 +427,8 @@ class Buttons():
         #that one. Otherwise, make a new one with a solid color as given.
         if type(inp) == pygame.Surface:
             return pygame.transform.scale(inp, self.scaled(size))
-            #return(inp)
         elif inp is None:
             return pygame.Surface(self.scaled(size), pygame.SRCALPHA)
-            #return(pygame.Surface((1,1), pygame.SRCALPHA))
         elif hasattr(inp, "__call__"):
             return inp(self)
         else:
@@ -538,7 +536,7 @@ class Buttons():
         if isinstance(background, pygame.Surface): #Pre-existing surface
             return background
         elif not background: #Empty background
-            return(None)
+            return None
         elif hasattr(background, "__call__"): #Allows the user to pass in a custom function to draw the background / Surface
             return background
         else:
@@ -554,6 +552,7 @@ class Buttons():
         self.updated = True
         #Draw the button to make sure the button surface is updated too.
         self.Draw(pygame.Surface((1,1)))
+
 
     @staticmethod
     def offset(pos, offset_vector, scalar_vector = (1, 1)):

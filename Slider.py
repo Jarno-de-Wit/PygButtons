@@ -191,9 +191,9 @@ class Slider(Buttons):
         if other is not None:
             value = (value, other)
         if self.orientation % 2:
-            return(tuple(reversed(value)))
+            return tuple(reversed(value))
         else:
-            return(value)
+            return value
 
     def Marking_coords(self):
         try:
@@ -249,7 +249,7 @@ class Slider(Buttons):
 
     @property
     def is_selected(self):
-        return(self.__is_selected)
+        return self.__is_selected
 
     @is_selected.setter
     def is_selected(self, value):
@@ -270,7 +270,7 @@ class Slider(Buttons):
             else:
                 self.__value = self.Clamp(self.value_range[0] + pos / coord_range * (self.value_range[1] - self.value_range[0]), *sorted(self.value_range))
             self._moved = False
-        return(self.__value)
+        return self.__value
 
     @value.setter
     def value(self, val):
@@ -285,7 +285,7 @@ class Slider(Buttons):
 
     @property
     def value_range(self):
-        return(self.__value_range)
+        return self.__value_range
 
     @value_range.setter
     def value_range(self, value):
@@ -294,9 +294,9 @@ class Slider(Buttons):
 
     @property
     def moved(self):
-        moved_ = self.__moved
+        moved = self.__moved
         self.__moved = False
-        return(moved_)
+        return moved
 
     @moved.setter
     def moved(self, value):

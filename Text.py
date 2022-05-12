@@ -174,7 +174,7 @@ class Text(Buttons):
     def scrolled(self):
         if self.scroll_bar and self.scroll_bar.moved:
             self.scrolled = round(self.scroll_bar.value)
-        return(self.__scrolled)
+        return self.__scrolled
 
     @scrolled.setter
     def scrolled(self, value):
@@ -208,7 +208,7 @@ class Text(Buttons):
 
     @property
     def text(self):
-        return(self.__text)
+        return self.__text
 
     @text.setter
     def text(self, value):
@@ -221,7 +221,7 @@ class Text(Buttons):
 
     @property
     def lines(self):
-        return(self.__lines)
+        return self.__lines
 
     @lines.setter
     def lines(self, value):
@@ -276,8 +276,8 @@ def Make_scroll_bar(self, scroll_bar):
         scroll_bar.centery = math.floor(self.height)
         if scroll_bar.height > self.height - 2 * text_offset:
             scroll_bar.height = self.height - 2 * text_offset
-        return(scroll_bar)
-    if isinstance(scroll_bar, int) and int(scroll_bar) == 1:
+        return scroll_bar
+    if scroll_bar == 1:
         size = (15, self.height - 2 * self.text_offset[1])
         pos = (self.width - size[0] - self.text_offset[0], self.text_offset[1])
         style = "Round"
@@ -286,12 +286,12 @@ def Make_scroll_bar(self, scroll_bar):
         slider_bg = (220, 220, 220)
         slider_accent_bg = (127, 127, 127)
         slider_border = None
-        return(Slider(pos, size, style = style, background = background, border = border, slider_background = slider_bg, slider_border = slider_border, independent = True))
-    elif isinstance(scroll_bar, int) and int(scroll_bar) == 2:
+        return Slider(pos, size, style = style, background = background, border = border, slider_background = slider_bg, slider_border = slider_border, independent = True)
+    elif scroll_bar == 2:
         size = (15, self.height - 2 * self.text_offset[1])
         pos = (self.width - size[0] - self.text_offset[0], self.text_offset[1])
         slider_feature_text = "|||"
         slider_feature_size = 9
-        return(Slider(pos, size, slider_feature_text = slider_feature_text, slider_feature_size = slider_feature_size, independent = True))
+        return Slider(pos, size, slider_feature_text = slider_feature_text, slider_feature_size = slider_feature_size, independent = True)
     else:
         raise ValueError(f"Unsupported scroll_bar style: {repr(scroll_bar)}")

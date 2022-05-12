@@ -196,7 +196,7 @@ class Button(Buttons):
 
     @property
     def text(self):
-        return(self.__text)
+        return self.__text
 
     @text.setter
     def text(self, value):
@@ -205,7 +205,7 @@ class Button(Buttons):
 
     @property
     def value(self):
-        return(self.__value)
+        return self.__value
 
     @value.setter
     def value(self, value):

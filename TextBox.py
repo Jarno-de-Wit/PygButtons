@@ -225,12 +225,12 @@ class TextBox(Buttons):
             screen.blit(self.cursor_surface, self.scaled(self.topleft, True))
         else:
             screen.blit(self.surface, self.scaled(self.topleft, True))
-        return()
+        return
 
 
     @property
     def is_selected(self):
-        return(self.__is_selected)
+        return self.__is_selected
 
     @is_selected.setter
     def is_selected(self, value):
@@ -260,7 +260,7 @@ class TextBox(Buttons):
 
     @property
     def cursor(self):
-        return(self.__cursor)
+        return self.__cursor
 
     @cursor.setter
     def cursor(self, value):
@@ -273,7 +273,7 @@ class TextBox(Buttons):
 
     @property
     def text_scroll(self):
-        return(self.__text_scroll)
+        return self.__text_scroll
 
     @text_scroll.setter
     def text_scroll(self, value):
@@ -283,7 +283,7 @@ class TextBox(Buttons):
 
     @property
     def text(self):
-        return(self.__value)
+        return self.__value
 
     @text.setter
     def text(self, value):

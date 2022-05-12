@@ -326,7 +326,7 @@ class DropdownBox(Buttons):
     @property
     def value(self):
         if self.state >= 0:
-            return(self.options[self.state])
+            return self.options[self.state]
         else:
             return -1
 
@@ -472,8 +472,8 @@ def Make_scroll_bar(self, scroll_bar):
         scroll_bar.right = self.width
         scroll_bar.height = self._display_pixel_length
         scroll_bar.top = 0
-        return(scroll_bar)
-    if isinstance(scroll_bar, int) and int(scroll_bar) == 1:
+        return scroll_bar
+    if scroll_bar == 1:
         size = (15, self._display_pixel_length)
         pos = (self.width - size[0], 0)
         style = "Round"
@@ -482,12 +482,12 @@ def Make_scroll_bar(self, scroll_bar):
         slider_bg = (220, 220, 220)
         slider_accent_bg = (127, 127, 127)
         slider_border = None
-        return(Slider(pos, size, style = style, background = background, border = border, slider_background = slider_bg, slider_border = slider_border, orientation = 1, independent = True))
-    elif isinstance(scroll_bar, int) and int(scroll_bar) == 2:
+        return Slider(pos, size, style = style, background = background, border = border, slider_background = slider_bg, slider_border = slider_border, orientation = 1, independent = True)
+    elif scroll_bar == 2:
         size = (15, self._display_pixel_length)
         pos = (self.width - size[0], 0)
         slider_feature_text = "|||"
         slider_feature_size = 9
-        return (Slider(pos, size, slider_feature_text = slider_feature_text, slider_feature_size = slider_feature_size, orientation = 1, independent = True))
+        return Slider(pos, size, slider_feature_text = slider_feature_text, slider_feature_size = slider_feature_size, orientation = 1, independent = True)
     else:
         raise ValueError(f"Unsupported scroll_bar style: {repr(scroll_bar)}")
