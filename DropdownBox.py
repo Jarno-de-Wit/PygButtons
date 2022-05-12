@@ -361,7 +361,9 @@ class DropdownBox(Buttons):
 
     @property
     def new_state(self):
-        return self.__new_state
+        new_state = self.__new_state
+        self.__new_state = False
+        return new_state
 
     @new_state.setter
     def new_state(self, value):
