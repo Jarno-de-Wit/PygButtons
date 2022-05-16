@@ -329,7 +329,7 @@ class Buttons():
             if scaled_center:
                 center = tuple(i / button.scale for i in scaled_center)
 
-            # Apply the translation to make sure the given coordinates stay at the same place
+            #Apply the translation to make sure the given coordinates stay at the same place
             button._move(tuple(i * (scale_factor - 1) for i in center))
 
             if relative_scale:

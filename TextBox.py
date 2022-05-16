@@ -88,7 +88,6 @@ class TextBox(Buttons):
             self.text_offset = 2 * (round(self.font_size / 4) + max([brdr[1] + brdr[2] for brdr in (self.border, self.accent_border) if brdr], default = 0),)
 
         #Settting the initial state for certain default variables
-        self.cursor_animation = 0
         self.text_scroll = 0
         self.cursor = 0
         self.is_selected = False
@@ -102,7 +101,6 @@ class TextBox(Buttons):
             self.Buttons.input_claim = True
             self.Buttons.input_processed = True
             if self.is_selected:
-                self.cursor_animation = 0
                 pos = self.relative(pos)
                 #If there is any text: (Check required since for loop has to run at least once to not crash)
                 if self.text:
@@ -130,7 +128,6 @@ class TextBox(Buttons):
                     self.cursor = 0
             else:
                 self.is_selected = True
-                self.cursor_animation = 0
                 self.cursor = len(self.text)
         elif self.is_selected:
             self.is_selected = False
@@ -264,9 +261,9 @@ class TextBox(Buttons):
 
     @cursor.setter
     def cursor(self, value):
-        #Make sure the cursor cannot be set to negative points.
+        #Make sure the cursor cannot be set to negative points, nor can it go further than directly after the last character.
         self.__cursor = self.Clamp(int(value), 0, len(self.text))
-        self.cursor_animation = self.framerate
+        self.cursor_animation = self.framerate - 1
         self.updated = True
         self.update_scroll()
 

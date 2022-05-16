@@ -97,7 +97,7 @@ class Slider(Buttons):
         self.edge_markings = edge_markings
         self.marking_colour = marking_colour
 
-        #Create the sliding object (from now on referred to as "slider" (lower case)
+        #Create the sliding object (from now on referred to as "slider" (lower case))
         self.tmp_slider_size = slider_size
         self.slider = Make_slider(self, style, slider_size, slider_background, slider_accent_background, slider_border, markings, edge_markings, snap_radius, slider_feature_text, slider_feature_colour, slider_feature_font, slider_feature_size, self.orientation)
         self.value = start_value
