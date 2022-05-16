@@ -30,6 +30,10 @@ class Slider(Buttons):
     slider_feature_colour: (R, G, B) - The colour of the feature / text on the slider.
     slider_feature_text: str - The feature / text that will be rendered to the slider.
     slider_size: "auto", int, (width, height) - The size of the slider. If set to "auto", will automatically fit the slider to the direction orthogonal to the orientation.
+    functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments.
+                    - "Click": Called when the Slider is clicked.
+                    - "Release": Called when the Slider is released.
+                    - "Move": Called when the Slider is moved to a new location. Only called by user input.
     func_data: dict - Contains potential additional data for use by custom background drawing functions.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
     independent: bool - Determines whether or not the button is allowed to set the input_lock, and is added to buttons.list_all. Mostly important for buttons which are part of another button.
@@ -69,6 +73,7 @@ class Slider(Buttons):
                  slider_feature_text = "",
                  slider_size = "Auto",
                  #Other (miscelaneous) settings
+                 functions = {},
                  func_data = {},
                  group = None,
                  independent = False,
@@ -100,13 +105,14 @@ class Slider(Buttons):
         #Create the sliding object (from now on referred to as "slider" (lower case))
         self.tmp_slider_size = slider_size
         self.slider = Make_slider(self, style, slider_size, slider_background, slider_accent_background, slider_border, markings, edge_markings, snap_radius, slider_feature_text, slider_feature_colour, slider_feature_font, slider_feature_size, self.orientation)
-        self.value = start_value
-        del(self.tmp_slider_size)
+        self._value = start_value
+        del self.tmp_slider_size
         self.children.append(self.slider)
 
         #Other
         self.is_selected = False
         self.moved = True #Indicates whether there is a chance the slider has moved. If so, the user can take action (if necessary).
+        self.functions = functions
         self.func_data = func_data
         self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are set-up correctly
 
@@ -221,9 +227,9 @@ class Slider(Buttons):
         """
         if args: #If the user passed the values in as two separate values, combine them into one tuple
             range = (range, args[0])
-        self.value #Flush any _moved arguments, in case they haven't been processed yet.
+        self._value #Flush any _moved arguments, in case they haven't been processed yet.
         self.value_range = tuple(range) #Update the slider range
-        self.value = self.Clamp(self.value, *sorted(self.value_range)) #Reset the value, to update the sliders' position
+        self.value = self.Clamp(self._value, *sorted(self.value_range)) #Reset the value, to update the sliders' position
 
     def Set_slider_primary(self, value, limit_size = True):
         """
@@ -234,14 +240,14 @@ class Slider(Buttons):
         if limit_size:
             #Make sure the slider primary can not accidentally be set too low.
             value = max(value, round(self.rotated(self.slider.size)[1] / 2))
-        self.value #Flush any _moved arguments, in case they haven't been processed yet.
+        self._value #Flush any _moved arguments, in case they haven't been processed yet.
         if self.orientation % 2: #Update the sliders' size
             if self.slider.height != value:
                 self.slider.height = value
         else:
             if self.slider.width != value:
                 self.slider.width = value
-        self.value = self.value #Reset the value to update the sliders' position
+        self._value = self._value #Reset the value to update the sliders' position
         #Update the sliders' snap points
         self.slider.snap = self.rotated(tuple(self.rotated(self.topleft)[0] - value / 2 + coord for coord in self.Marking_coords()), ()) + (self.slider.snap[2],)
         self.updated = True
@@ -261,7 +267,8 @@ class Slider(Buttons):
             self.Release_lock()
 
     @property
-    def value(self):
+    def _value(self):
+        #Note: No need to run ._Call() anywhere in this code. The fact that the .__value is only updated here isn't important. It was already called when the slider was actually moved.
         if self._moved: #If the user clicked on the slider, the value should be re-calculated from the slider position. If not, the value should be exactly what the user set.
             pos = round(self.rotated(self.relative(self.scaled(self.slider.topleft)))[0])
             coord_range = self.scaled(self.rotated(self.size)[0] - self.rotated(self.slider.size)[0]) #The available pixels for the slider to move in
@@ -271,9 +278,8 @@ class Slider(Buttons):
                 self.__value = self.Clamp(self.value_range[0] + pos / coord_range * (self.value_range[1] - self.value_range[0]), *sorted(self.value_range))
             self._moved = False
         return self.__value
-
-    @value.setter
-    def value(self, val):
+    @_value.setter
+    def _value(self, val):
         val = self.Clamp(val, *sorted(self.value_range))
         if self.value_range[0] == self.value_range[1]:
             self.slider.center = self.center
@@ -284,13 +290,21 @@ class Slider(Buttons):
         self._moved = False
 
     @property
+    def value(self):
+        return self._value
+    @value.setter
+    def value(self, val):
+        self._value = val
+        self._Call("Move")
+
+    @property
     def value_range(self):
         return self.__value_range
 
     @value_range.setter
     def value_range(self, value):
         self.__value_range = self.Verify_iterable(value, 2)
-        self.value += 0
+        self._value += 0
 
     @property
     def moved(self):
@@ -301,6 +315,20 @@ class Slider(Buttons):
     @moved.setter
     def moved(self, value):
         self.__moved = value
+
+    @property
+    def _functions(self):
+        return self.slider._functions
+    @_functions.setter
+    def _functions(self, value):
+        self.slider._functions = value
+
+    @property
+    def functions(self):
+        return self.slider._functions
+    @functions.setter
+    def functions(self, value):
+        self.slider._functions = self.Verify_functions(value)
 
     @property #Properties required to be able to overwrite setters
     def left(self):
@@ -339,7 +367,7 @@ def Make_slider(self, style, size, background, accent_background, border, markin
     else:
         limits = (self.left, self.right, self.top - size[1], self.bottom + size[1])
     #pos is irrelevant, as it is set by the value setter anyway
-    return(Button((0, 0), size, mode = "Hold", style = style,
+    return Button((0, 0), size, mode = "Hold", style = style,
                 background = background,
                 text = feature_text,
                 text_colour = feature_colour,
@@ -352,4 +380,4 @@ def Make_slider(self, style, size, background, accent_background, border, markin
                 limits = limits,
                 snap = self.rotated(tuple(self.rotated(self.topleft)[0] - (self.rotated(size)[0] / 2) + coord for coord in self.Marking_coords()), ()) + (snap_radius,),
                 independent = True,
-                ))
+                )

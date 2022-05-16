@@ -28,6 +28,10 @@ class Button(Buttons):
     dragable: (horizotal, vertical) - A tuple of two booleans defining whether the Button is allowed to be moved in either the horizontal and / or vertical direction repectively.
     limits: (left, right, top, bottom) - The coordinate limits between which the Button is to be draggable.
     snap: ((x snap coords, ___), (y snapc coords, ___), snap_range) - If the button is dragable / movable, the positions to which the Button should snap, as well as the range (in px) within which the Button should snap to these locations.
+    functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments.
+                    - "Click": Called when the Button is clicked.
+                    - "Release": Called when the Button is released. Available only when mode == "Hold" or mode == "Toggle".
+                    - "Move": Called when the Button is dragged to a new location. Only available if any(dragable).
     func_data: dict - Contains potential additional data for use by custom background drawing functions.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
     independent: bool - Determines whether or not the button is allowed to set the input_lock, and is added to buttons.list_all. Mostly important for buttons which are part of another button.
@@ -54,6 +58,7 @@ class Button(Buttons):
                  dragable = (False, False),
                  limits = (None, None, None, None),
                  snap = ((), (), 0),
+                 functions = {},
                  func_data = {},
                  group = None,
                  independent = False
@@ -86,6 +91,7 @@ class Button(Buttons):
         limits = self.Verify_iterable(limits, 4)
         self.limits = list(value if value else ( (-1) ** (i + 1) * math.inf) for i, value in enumerate(limits))
         self.snap = self.Verify_iterable(snap, 3)
+        self.functions = functions
         self.func_data = func_data
         self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are prepared and set-up correctly
 
@@ -106,6 +112,11 @@ class Button(Buttons):
             self.Buttons.input_processed = True
             if any(self.dragable):
                 self.drag_pos = self.relative(pos)
+
+            if self.mode == "toggle" and not self.value: #If the button is toggled OFF, _Call release. For all other cases, _Call click
+                self._Call("Release")
+            else:
+                self._Call("Click")
         return
 
     def LMB_up(self, pos):
@@ -116,11 +127,13 @@ class Button(Buttons):
                 self.value = False
                 self.clicked = True
                 self.Release_lock()
+                self._Call("Release")
         return
 
     def Set_cursor_pos(self, pos):
         if self.value:
             if any(self.dragable):
+                topleft = self.topleft
                 hori, verti = self.offset(self.relative(pos), self.drag_pos, (-1, -1)) #Determine the offsets of the cursor from where the user originally clicked
 
                 left = self.left + hori / self.scale * self.dragable[0] #Scale the offsets down to the original scale
@@ -140,6 +153,8 @@ class Button(Buttons):
                 #Confine the button within the limits
                 self.left = self.Clamp(left, self.limits[0], self.limits[1] - self.width)
                 self.top = self.Clamp(top, self.limits[2], self.limits[3] - self.height)
+                if self.topleft != topleft: #If the Button moved:
+                    self._Call("Move")
 
 
     def Scale(self, scale, relative_scale = True):
@@ -221,3 +236,18 @@ class Button(Buttons):
     @clicked.setter
     def clicked(self, value):
         self.__clicked = value
+
+
+    @property
+    def _functions(self):
+        return self.__functions
+    @_functions.setter
+    def _functions(self, value):
+        self.__functions = value
+
+    @property
+    def functions(self):
+        return self.__functions
+    @functions.setter
+    def functions(self, value):
+        self.__functions = self.Verify_functions(value)

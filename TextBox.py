@@ -23,6 +23,10 @@ class TextBox(Buttons):
     border: ((R, G, B), width, offset), None - The border that appears around the TextBox.
     accent background: pygame.Surface, (R, G, B), None, function - The background of the button if it is_selected. If set to None, will be the same as normal background.
     accent_border: ((R, G, B), width, offset), None - An additional border that can be drawn when the TextBox is selected.
+    functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments.
+                    - "Select": Called whenever the TextBox is selected.
+                    - "Deselect": Called whenever the TextBox is deselected.
+                    - "Type": Called every time a valid Key_down (one which could alter the contents of the TextBox) is recorded while this TextBox is selected.
     func_data: dict - Contains potential additional data for use by custom background drawing functions.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
     independent: bool - Determines whether or not the button is allowed to set the input_lock, and is added to buttons.list_all. Mostly important for buttons which are part of another button.
@@ -52,6 +56,7 @@ class TextBox(Buttons):
                  border = ((63, 63, 63), 1, 0),
                  accent_background = None,
                  accent_border = ((0, 0, 0), 1, 2), #Set to None or False to disable
+                 functions = {},
                  func_data = {},
                  group = None,
                  independent = False,
@@ -90,8 +95,9 @@ class TextBox(Buttons):
         #Settting the initial state for certain default variables
         self.text_scroll = 0
         self.cursor = 0
-        self.is_selected = False
+        self.__is_selected = False
         self.deselected = False
+        self.functions = functions
         self.func_data = func_data
         self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are set-up correctly
 
@@ -158,7 +164,9 @@ class TextBox(Buttons):
             return
         #Inform Buttons that the input has been processed / used
         self.Buttons.input_processed = True
-
+        #Call "type" if the Key_down event was one which could have altered the text contents.
+        if event.key not in (pygame.K_RETURN, pygame.K_RIGHT, pygame.K_LEFT):
+            self._Call("Type")
         return
 
 
@@ -236,12 +244,14 @@ class TextBox(Buttons):
             self.__is_selected = True
             self.cursor = len(self.text)
             self.Set_lock()
+            self._Call("Select")
         else:
             self.__is_selected = False
             self.deselected = True
             self.cursor = 0
             self.cursor_animation = self.framerate
             self.Release_lock(False) #Release without claiming the input
+            self._Call("Deselect")
 
 
     @property
@@ -309,6 +319,21 @@ class TextBox(Buttons):
     @new_input.setter
     def new_input(self, value):
         self.__new_input = value
+
+
+    @property
+    def _functions(self):
+        return self.__functions
+    @_functions.setter
+    def _functions(self, value):
+        self.__functions = value
+
+    @property
+    def functions(self):
+        return self.__functions
+    @functions.setter
+    def functions(self, value):
+        self.__functions = self.Verify_functions(value)
 
 
     def update_scroll(self):

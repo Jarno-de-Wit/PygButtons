@@ -21,6 +21,8 @@ class Text(Buttons):
     scroll_bar: None, int, Slider - The type of scrollbar to be included. Default styles 1 and 2 are available.
     background: pygame.Surface, (R, G, B), None, function - The background of the button. If a function is given, it will be called in Make_background as 'function(self)'.
     border: ((R, G, B), width, offset), None - The border that appears around the TextBox.
+    functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments.
+                    - "Move": Called whenever the Text object is scrolled.
     func_data: dict - Contains potential additional data for use by custom background drawing functions.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
     independent: bool - Determines whether or not the button is allowed to set the input_lock, and is added to buttons.list_all. Mostly important for buttons which are part of another button.
@@ -47,6 +49,7 @@ class Text(Buttons):
                  scroll_bar = None,
                  background = None,
                  border = None,
+                 functions = {},
                  func_data = {},
                  group = None,
                  independent = False,
@@ -80,6 +83,7 @@ class Text(Buttons):
         self.text = text
         self.__scrolled = 0
         self.Build_lines()
+        self.functions = functions
         self.func_data = func_data
         self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are set-up correctly
 
@@ -234,6 +238,33 @@ class Text(Buttons):
         self.__lines = tuple(value)
         self.__text = "\n".join(self.__lines)
         self.updated = True
+
+
+    @property
+    def _functions(self):
+        if self.scroll_bar:
+            return self.scroll_bar._functions
+        else:
+            return self.__functions
+    @_functions.setter
+    def _functions(self, value):
+        if self.scroll_bar:
+            self.scroll_bar._functions = value
+        else:
+            self.__functions = value
+
+    @property
+    def functions(self):
+        if self.scroll_bar:
+            return self.scroll_bar._functions
+        else:
+            return self.__functions
+    @functions.setter
+    def functions(self, value):
+        if self.scroll_bar:
+            self.scroll_bar._functions = self.Verify_functions(value)
+        else:
+            self.__functions = self.Verify_functions(value)
 
 
     def Build_lines(self):

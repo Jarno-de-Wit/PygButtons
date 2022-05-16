@@ -27,6 +27,11 @@ class DropdownBox(Buttons):
     border: ((R, G, B), width, offset), None - The border that appears around the buttons in the DropdownBox.
     accent background: pygame.Surface, (R, G, B), None, function - The background of the button if it is_selected. If set to None, will be the same as normal background.
     dropdown_background: pygame.Surface, (R, G, B), None, function - The background that is rendered behind the buttons on the dropdown section of the DropdownBox.
+    functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments.
+                    - "Select": Called whenever the DropdownBox is selected (dropped down).
+                    - "Deselect": Called whenever the DropdownBox is deselected.
+                    - "Update": Called whenever the state is changed.
+                    - "Move": Called whenever the dropdown area is scrolled.
     func_data: dict - Contains potential additional data for use by custom background drawing functions.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
     independent: bool - Determines whether or not the button is allowed to set the input_lock, and is added to buttons.list_all. Mostly important for buttons which are part of another button.
@@ -58,6 +63,7 @@ class DropdownBox(Buttons):
                  border = ((63, 63, 63), 1, 0),
                  accent_background = (220, 220, 220),
                  dropdown_background = None,
+                 functions = {},
                  func_data = {},
                  group = None,
                  independent = False
@@ -107,6 +113,7 @@ class DropdownBox(Buttons):
 
         self.text_colour = text_colour
 
+        self.functions = functions
         self.func_data = func_data
         #Add in all the options
         for option in options:
@@ -220,8 +227,8 @@ class DropdownBox(Buttons):
         set_to: bool - Whether the new value should be automatically switched to as the currently selected option.
         """
         #Save and clear the state, as it can change by inserting a new button in between
-        state = self.state
-        self.state = -1
+        state = self._state
+        self._state = -1
         if sort:
             #The index is the first item, for which value sorts before the item
             index = min([ind for ind, option in enumerate(self.options) if value == sorted([value, option])[0]], default = len(self.options))
@@ -250,9 +257,9 @@ class DropdownBox(Buttons):
 
         #Set self.state to the correct value again
         if set_to:
-            self.state = index
-        elif index <= self.state: #If the new item is before the current one, shift the index by 1 as well
-            self.state = state + 1
+            self.state = index #Set the new state, including running ._Call
+        elif index <= self._state: #If the new item is before the current one, shift the index by 1 as well, and don't run ._Call
+            self._state = state + 1
 
         #Update the scroll_bar size if present
         if self.scroll_bar:
@@ -281,6 +288,7 @@ class DropdownBox(Buttons):
         if isinstance(index, int):
             if index >= len(self.options) or -index > len(self.options): #If the index is invalid (too big positive, or too small negative)
                 return False
+            index %= len(self.options)
         else:
             #Try to find the index of the specified item
             try:
@@ -289,8 +297,8 @@ class DropdownBox(Buttons):
                 return False
 
         #Save and clear the state, as it can change by removing a button
-        state = self.state
-        self.state = -1
+        state = self._state
+        self._state = -1
 
         #Remove all references to the button / option from this butttons' lists
         self.children.remove(self.button_list[index])
@@ -303,10 +311,13 @@ class DropdownBox(Buttons):
 
         #Reduce the state by 1, if the selected button came after the current button
         if state > index:
-            self.state = state - 1
+            self._state = state - 1
         elif state < index:
-            self.state = state
-        #If state == index, don't change self.state again. In that case, the selected item was the one which was removed, so we shouldn't set a new item
+            self._state = state
+        else:
+            #If state == index, don't change self.state again. In that case, the selected item was the one which was removed, so we shouldn't set a new item.
+            #._Call should still be run though as the state did change.
+            self._Call("Update")
 
         #Update the scroll_bar size if present
         if self.scroll_bar:
@@ -325,25 +336,25 @@ class DropdownBox(Buttons):
 
     @property
     def value(self):
-        if self.state >= 0:
-            return self.options[self.state]
+        if self._state >= 0:
+            return self.options[self._state]
         else:
             return -1
 
     @value.setter
     def value(self, value):
         if value in self.options:
-            self.state = self.options.index(value)
+            self._state = self.options.index(value)
         else:
             raise ValueError("Value not in options list")
 
-
+    #_state is for internal use only. It allows the Button to update the state, without accidentally triggering the ._Call.
+    # In doing so, it allows any user-set values to still run ._Call, and perform all required checks with minimal code duplicates.
     @property
-    def state(self):
+    def _state(self):
         return self.__state
-
-    @state.setter
-    def state(self, value):
+    @_state.setter
+    def _state(self, value):
         #Clear the currently selected button (if any)
         if self.__state >= 0:
             self.button_list[self.__state].value = False
@@ -358,6 +369,16 @@ class DropdownBox(Buttons):
         self.new_state = True
         self.updated = True
         self.moved = True
+
+
+    @property
+    def state(self):
+        return self.__state
+
+    @state.setter
+    def state(self, value):
+        self._state = value
+        self._Call("Update")
 
     @property
     def new_state(self):
@@ -411,12 +432,33 @@ class DropdownBox(Buttons):
         elif value:
             self.arrow.value = True
             self.Set_lock()
+            self._Call("Select")
         else:
             self.arrow.value = False
             self.scrolled = 0
             self.moved = True
             self.Release_lock(False)
+            self._Call("Deselect")
         self.updated = True
+
+
+    @property
+    def _functions(self):
+        return self.__functions
+    @_functions.setter
+    def _functions(self, value):
+        self.__functions = value
+        if self.scroll_bar:
+            self.scroll_bar._functions = value
+
+    @property
+    def functions(self):
+        return self.__functions
+    @functions.setter
+    def functions(self, value):
+        self.__functions = self.Verify_functions(value)
+        if self.scroll_bar:
+            self.scroll_bar._functions = self.__functions
 
 
     @property

@@ -544,6 +544,15 @@ class Buttons():
             return background
 
 
+    def Verify_functions(cls, functions):
+        if not isinstance(functions, dict):
+            raise TypeError(f"'functions' must be type 'dict', not type '{type(functions).__name__}'")
+        if not all(isinstance(key, str) for key in functions):
+            raise TypeError(f"All keys in 'functions' must be type 'str'")
+        functions = {key.title(): value for key, value in functions.items()}
+        return functions
+
+
     def Force_update(self):
         """
         A function that forces a button to get updated. Can be used when an attribute is changed which does not directly cause it to update.
@@ -619,6 +628,19 @@ class Buttons():
         """
         #pygame.font.Font is used in favor of pygame.font.SysFont, as SysFont's font sizes are inconsistent with the value given for the font.
         self.__font = pygame.font.Font(self.font_name, round(self.scale * self.font_size))
+
+
+    def _Call(self, action):
+        """
+        Calls a function, if it exists, for the action specified
+        """
+        if not action in self.functions: #If no function was specified for this action, ignore the fact that this function was called anyway
+            return
+        if isinstance(self.functions[action], (tuple, list)):
+            self.functions[action][0](*self.functions[action][1:])
+        else:
+            self.functions[action]()
+        return
 
 
     @property
