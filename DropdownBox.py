@@ -34,6 +34,7 @@ class DropdownBox(Buttons):
                     - "Move": Called whenever the dropdown area is scrolled.
     func_data: dict - Contains potential additional data for use by custom background drawing functions.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
+    root: None, Button - The Button that is considered the 'root element' for this Button. Any function calls that need to include a 'self' Button, will include this root Button instead.
     independent: bool - Determines whether or not the button is allowed to set the input_lock, and is added to buttons.list_all. Mostly important for buttons which are part of another button.
 
 
@@ -66,12 +67,13 @@ class DropdownBox(Buttons):
                  functions = {},
                  func_data = {},
                  group = None,
+                 root = None,
                  independent = False
                  ):
         """
         Create a DropdownBox Button object. See help(type(self)) for more detailed information.
         """
-        super().__init__(pos, size, font_name, font_size, group, independent)
+        super().__init__(pos, size, font_name, font_size, group, root, independent)
         #Storing information required for later child buttons
         self.bg = self.Verify_background(background)
         self.accent_bg = self.Verify_background(accent_background)
@@ -96,12 +98,12 @@ class DropdownBox(Buttons):
         self.dropdown_bg = self.Verify_background(dropdown_background)
         self.display_length = display_length
         #Create the arrow button
-        self.arrow = Button((self.width - self.height, 0), (self.height, self.height), border = border, background = Arrow_bg, accent_background = None, style = style, mode = "Toggle", independent = True)
+        self.arrow = Button((self.width - self.height, 0), (self.height, self.height), border = border, background = Arrow_bg, accent_background = None, style = style, mode = "Toggle", root = self.root, independent = True)
         self.arrow.func_data = dict(list(func_data.items()) + [("__bg", self.Verify_background(background),), ("__accent_bg", self.Verify_background(accent_background),)])
         self.children.append(self.arrow)
 
         #Make the button containing the information about the currently selected option.
-        self.main_button = Button((0, 0), (self.width - self.height - self.spacing[0], self.height), font_name = font_name, font_size = font_size, border = border, background = background, accent_background = accent_background, style = style, func_data = func_data, independent = True)
+        self.main_button = Button((0, 0), (self.width - self.height - self.spacing[0], self.height), font_name = font_name, font_size = font_size, border = border, background = background, accent_background = accent_background, style = style, func_data = func_data, root = self.root, independent = True)
         self.children.append(self.main_button)
 
         if scroll_bar:
@@ -246,6 +248,7 @@ class DropdownBox(Buttons):
                             font_size = self.font_size,
                             border = self.border,
                             func_data = self.func_data,
+                            root = self.root,
                             independent = True
                             )
         self.button_list.insert(index, new_button)
@@ -317,7 +320,7 @@ class DropdownBox(Buttons):
         else:
             #If state == index, don't change self.state again. In that case, the selected item was the one which was removed, so we shouldn't set a new item.
             #._Call should still be run though as the state did change.
-            self._Call("Update")
+            self.root._Call("Update")
 
         #Update the scroll_bar size if present
         if self.scroll_bar:
@@ -378,7 +381,7 @@ class DropdownBox(Buttons):
     @state.setter
     def state(self, value):
         self._state = value
-        self._Call("Update")
+        self.root._Call("Update")
 
     @property
     def new_state(self):
@@ -432,33 +435,14 @@ class DropdownBox(Buttons):
         elif value:
             self.arrow.value = True
             self.Set_lock()
-            self._Call("Select")
+            self.root._Call("Select")
         else:
             self.arrow.value = False
             self.scrolled = 0
             self.moved = True
             self.Release_lock(False)
-            self._Call("Deselect")
+            self.root._Call("Deselect")
         self.updated = True
-
-
-    @property
-    def _functions(self):
-        return self.__functions
-    @_functions.setter
-    def _functions(self, value):
-        self.__functions = value
-        if self.scroll_bar:
-            self.scroll_bar._functions = value
-
-    @property
-    def functions(self):
-        return self.__functions
-    @functions.setter
-    def functions(self, value):
-        self.__functions = self.Verify_functions(value)
-        if self.scroll_bar:
-            self.scroll_bar._functions = self.__functions
 
 
     @property
@@ -514,6 +498,7 @@ def Make_scroll_bar(self, scroll_bar):
         scroll_bar.right = self.width
         scroll_bar.height = self._display_pixel_length
         scroll_bar.top = 0
+        scroll_bar.root = self.root
         return scroll_bar
     if scroll_bar == 1:
         size = (15, self._display_pixel_length)
@@ -524,12 +509,12 @@ def Make_scroll_bar(self, scroll_bar):
         slider_bg = (220, 220, 220)
         slider_accent_bg = (127, 127, 127)
         slider_border = None
-        return Slider(pos, size, style = style, background = background, border = border, slider_background = slider_bg, slider_border = slider_border, orientation = 1, independent = True)
+        return Slider(pos, size, style = style, background = background, border = border, slider_background = slider_bg, slider_border = slider_border, orientation = 1, root = self.root, independent = True)
     elif scroll_bar == 2:
         size = (15, self._display_pixel_length)
         pos = (self.width - size[0], 0)
         slider_feature_text = "|||"
         slider_feature_size = 9
-        return Slider(pos, size, slider_feature_text = slider_feature_text, slider_feature_size = slider_feature_size, orientation = 1, independent = True)
+        return Slider(pos, size, slider_feature_text = slider_feature_text, slider_feature_size = slider_feature_size, orientation = 1, root = self.root, independent = True)
     else:
         raise ValueError(f"Unsupported scroll_bar style: {repr(scroll_bar)}")

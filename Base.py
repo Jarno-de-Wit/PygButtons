@@ -54,7 +54,7 @@ class Buttons():
     #A framerate variable to help with timing animations
     framerate = 30
 
-    def __init__(self, pos, size, font_name = pygame.font.get_default_font(), font_size = 20, groups = None, independent = False):
+    def __init__(self, pos, size, font_name = pygame.font.get_default_font(), font_size = 20, groups = None, root = None, independent = False):
         #Tasks that are the same for all sub-classes
         self.updated = True
         self.children = []
@@ -67,6 +67,7 @@ class Buttons():
         self.font_size = font_size
         self.font_name = font_name
         self.Add_to_group(groups)
+        self.root = self if root is None else root
         if not independent:
             self.Buttons.list_all.append(self)
         self.independent = independent
@@ -641,6 +642,14 @@ class Buttons():
         else:
             self.functions[action]()
         return
+
+
+    @property
+    def functions(self):
+        return self.__functions
+    @functions.setter
+    def functions(self, value):
+        self.__functions = self.Verify_functions(value)
 
 
     @property

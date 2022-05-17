@@ -36,6 +36,7 @@ class Slider(Buttons):
                     - "Move": Called when the Slider is moved to a new location. Only called by user input.
     func_data: dict - Contains potential additional data for use by custom background drawing functions.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
+    root: None, Button - The Button that is considered the 'root element' for this Button. Any function calls that need to include a 'self' Button, will include this root Button instead.
     independent: bool - Determines whether or not the button is allowed to set the input_lock, and is added to buttons.list_all. Mostly important for buttons which are part of another button.
 
     Inputs:
@@ -76,6 +77,7 @@ class Slider(Buttons):
                  functions = {},
                  func_data = {},
                  group = None,
+                 root = None,
                  independent = False,
                  ):
         """
@@ -83,7 +85,7 @@ class Slider(Buttons):
         """
         #Note: 'Slider' (captialised) in commments etc. refers to the main object (self)
         #      'slider' (non-capitalised) refers to the button that moves along the Slider (self.slider)
-        super().__init__(pos, size, groups = group, independent = independent) #We don't care about the font, as this Button will not contain any text
+        super().__init__(pos, size, groups = group, root = root, independent = independent) #We don't care about the font, as this Button will not contain any text
         #Initialise the basic parameters of the Slider
         self.__value_range = self.Verify_iterable(value_range, 2) #Directly written to the private property, to prevent a chicken - egg problem with self.value
         if type(orientation) is int:
@@ -295,7 +297,7 @@ class Slider(Buttons):
     @value.setter
     def value(self, val):
         self._value = val
-        self._Call("Move")
+        self.root._Call("Move")
 
     @property
     def value_range(self):
@@ -316,19 +318,6 @@ class Slider(Buttons):
     def moved(self, value):
         self.__moved = value
 
-    @property
-    def _functions(self):
-        return self.slider._functions
-    @_functions.setter
-    def _functions(self, value):
-        self.slider._functions = value
-
-    @property
-    def functions(self):
-        return self.slider._functions
-    @functions.setter
-    def functions(self, value):
-        self.slider._functions = self.Verify_functions(value)
 
     @property #Properties required to be able to overwrite setters
     def left(self):
@@ -379,5 +368,6 @@ def Make_slider(self, style, size, background, accent_background, border, markin
                 dragable = self.rotated((True, False)),
                 limits = limits,
                 snap = self.rotated(tuple(self.rotated(self.topleft)[0] - (self.rotated(size)[0] / 2) + coord for coord in self.Marking_coords()), ()) + (snap_radius,),
+                root = self.root,
                 independent = True,
                 )

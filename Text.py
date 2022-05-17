@@ -25,6 +25,7 @@ class Text(Buttons):
                     - "Move": Called whenever the Text object is scrolled.
     func_data: dict - Contains potential additional data for use by custom background drawing functions.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
+    root: None, Button - The Button that is considered the 'root element' for this Button. Any function calls that need to include a 'self' Button, will include this root Button instead.
     independent: bool - Determines whether or not the button is allowed to set the input_lock, and is added to buttons.list_all. Mostly important for buttons which are part of another button.
 
     Inputs:
@@ -52,12 +53,13 @@ class Text(Buttons):
                  functions = {},
                  func_data = {},
                  group = None,
+                 root = None,
                  independent = False,
                  ):
         """
         Create a Text Button object. See help(type(self)) for more detailed information.
         """
-        super().__init__(pos, size, font_name, font_size, group, independent)
+        super().__init__(pos, size, font_name, font_size, group, root, independent)
         self.style = style
         self.text_colour = self.Verify_colour(text_colour)
 
@@ -240,33 +242,6 @@ class Text(Buttons):
         self.updated = True
 
 
-    @property
-    def _functions(self):
-        if self.scroll_bar:
-            return self.scroll_bar._functions
-        else:
-            return self.__functions
-    @_functions.setter
-    def _functions(self, value):
-        if self.scroll_bar:
-            self.scroll_bar._functions = value
-        else:
-            self.__functions = value
-
-    @property
-    def functions(self):
-        if self.scroll_bar:
-            return self.scroll_bar._functions
-        else:
-            return self.__functions
-    @functions.setter
-    def functions(self, value):
-        if self.scroll_bar:
-            self.scroll_bar._functions = self.Verify_functions(value)
-        else:
-            self.__functions = self.Verify_functions(value)
-
-
     def Build_lines(self):
         """
         (Re-)builds the '*.lines' tuple based on the current value of self.text, such that the text will automatically wrap around to the next line if it won't fit on the current line anymore.
@@ -317,12 +292,12 @@ def Make_scroll_bar(self, scroll_bar):
         slider_bg = (220, 220, 220)
         slider_accent_bg = (127, 127, 127)
         slider_border = None
-        return Slider(pos, size, style = style, background = background, border = border, slider_background = slider_bg, slider_border = slider_border, independent = True)
+        return Slider(pos, size, style = style, background = background, border = border, slider_background = slider_bg, slider_border = slider_border, root = self.root, independent = True)
     elif scroll_bar == 2:
         size = (15, self.height - 2 * self.text_offset[1])
         pos = (self.width - size[0] - self.text_offset[0], self.text_offset[1])
         slider_feature_text = "|||"
         slider_feature_size = 9
-        return Slider(pos, size, slider_feature_text = slider_feature_text, slider_feature_size = slider_feature_size, independent = True)
+        return Slider(pos, size, slider_feature_text = slider_feature_text, slider_feature_size = slider_feature_size, root = self.root, independent = True)
     else:
         raise ValueError(f"Unsupported scroll_bar style: {repr(scroll_bar)}")

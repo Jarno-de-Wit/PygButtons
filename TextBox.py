@@ -29,6 +29,7 @@ class TextBox(Buttons):
                     - "Type": Called every time a valid Key_down (one which could alter the contents of the TextBox) is recorded while this TextBox is selected.
     func_data: dict - Contains potential additional data for use by custom background drawing functions.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
+    root: None, Button - The Button that is considered the 'root element' for this Button. Any function calls that need to include a 'self' Button, will include this root Button instead.
     independent: bool - Determines whether or not the button is allowed to set the input_lock, and is added to buttons.list_all. Mostly important for buttons which are part of another button.
 
     Inputs:
@@ -59,12 +60,13 @@ class TextBox(Buttons):
                  functions = {},
                  func_data = {},
                  group = None,
+                 root = None,
                  independent = False,
                  ):
         """
         Create a TextBox Button object. See help(type(self)) for more detailed information.
         """
-        super().__init__(pos, size, font_name, font_size, group, independent)
+        super().__init__(pos, size, font_name, font_size, group, root, independent)
         #Set up of basic TextBox properties
         self.text = ""
         self.new_input = False
@@ -166,7 +168,7 @@ class TextBox(Buttons):
         self.Buttons.input_processed = True
         #Call "type" if the Key_down event was one which could have altered the text contents.
         if event.key not in (pygame.K_RETURN, pygame.K_RIGHT, pygame.K_LEFT):
-            self._Call("Type")
+            self.root._Call("Type")
         return
 
 
@@ -244,14 +246,14 @@ class TextBox(Buttons):
             self.__is_selected = True
             self.cursor = len(self.text)
             self.Set_lock()
-            self._Call("Select")
+            self.root._Call("Select")
         else:
             self.__is_selected = False
             self.deselected = True
             self.cursor = 0
             self.cursor_animation = self.framerate
             self.Release_lock(False) #Release without claiming the input
-            self._Call("Deselect")
+            self.root._Call("Deselect")
 
 
     @property
@@ -319,21 +321,6 @@ class TextBox(Buttons):
     @new_input.setter
     def new_input(self, value):
         self.__new_input = value
-
-
-    @property
-    def _functions(self):
-        return self.__functions
-    @_functions.setter
-    def _functions(self, value):
-        self.__functions = value
-
-    @property
-    def functions(self):
-        return self.__functions
-    @functions.setter
-    def functions(self, value):
-        self.__functions = self.Verify_functions(value)
 
 
     def update_scroll(self):

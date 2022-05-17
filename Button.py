@@ -34,6 +34,7 @@ class Button(Buttons):
                     - "Move": Called when the Button is dragged to a new location. Only available if any(dragable).
     func_data: dict - Contains potential additional data for use by custom background drawing functions.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
+    root: None, Button - The Button that is considered the 'root element' for this Button. Any function calls that need to include a 'self' Button, will include this root Button instead.
     independent: bool - Determines whether or not the button is allowed to set the input_lock, and is added to buttons.list_all. Mostly important for buttons which are part of another button.
 
     Inputs:
@@ -61,12 +62,13 @@ class Button(Buttons):
                  functions = {},
                  func_data = {},
                  group = None,
+                 root = None,
                  independent = False
                  ):
         """
         Create a Button Button object. See help(type(self)) for more detailed information.
         """
-        super().__init__(pos, size, font_name, font_size, group, independent)
+        super().__init__(pos, size, font_name, font_size, group, root, independent)
         self.orientation = orientation
         self.style = style
         if type(mode) is not str:
@@ -114,9 +116,9 @@ class Button(Buttons):
                 self.drag_pos = self.relative(pos)
 
             if self.mode == "toggle" and not self.value: #If the button is toggled OFF, _Call release. For all other cases, _Call click
-                self._Call("Release")
+                self.root._Call("Release")
             else:
-                self._Call("Click")
+                self.root._Call("Click")
         return
 
     def LMB_up(self, pos):
@@ -127,7 +129,7 @@ class Button(Buttons):
                 self.value = False
                 self.clicked = True
                 self.Release_lock()
-                self._Call("Release")
+                self.root._Call("Release")
         return
 
     def Set_cursor_pos(self, pos):
@@ -154,7 +156,7 @@ class Button(Buttons):
                 self.left = self.Clamp(left, self.limits[0], self.limits[1] - self.width)
                 self.top = self.Clamp(top, self.limits[2], self.limits[3] - self.height)
                 if self.topleft != topleft: #If the Button moved:
-                    self._Call("Move")
+                    self.root._Call("Move")
 
 
     def Scale(self, scale, relative_scale = True):
@@ -236,18 +238,3 @@ class Button(Buttons):
     @clicked.setter
     def clicked(self, value):
         self.__clicked = value
-
-
-    @property
-    def _functions(self):
-        return self.__functions
-    @_functions.setter
-    def _functions(self, value):
-        self.__functions = value
-
-    @property
-    def functions(self):
-        return self.__functions
-    @functions.setter
-    def functions(self, value):
-        self.__functions = self.Verify_functions(value)
