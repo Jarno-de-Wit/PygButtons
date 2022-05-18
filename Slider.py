@@ -16,13 +16,13 @@ class Slider(Buttons):
     value_range: (a, b) - The range between which values the slider should (linearly) interpolate.
     orientation: "auto", int - The orientation of the Slider. In case orientation == "auto", the longest direction will be seen as the primary direction. If orientation == 0, the Slider will be horizontal; if orientation == 1, the Slider will be vertical.
     style: "Square", "Round", int - Defines the radius of curvature of the buttons' corners.
-    background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected. If a function is selected, it will be called in Make_background as function(self).
+    background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected.
     border: ((R, G, B), width, offset), None - The border that appears around the Sliders' background.
     markings: int - The amount of markings to be drawn to the background. Set to 0 to disable all markings.
     edge_markings: bool - Whether or not markings should be present at the edges too, or should be spaced equally over the entire text_box. Can not be enabled when markings < 2.
     marking_colour: (R, G, B) - The colour the markings will have when drawn onto the Slider background.
     snap_radius: int, float - The radius (in pixels) in which the slider should snap towards any markings.
-    slider_background: pygame.Surface, (R, G, B), None, function - The background of the slider if it is not selected. If a function is given, it will be called in Make_background as 'function(self)'.
+    slider_background: pygame.Surface, (R, G, B), None, function - The background of the slider if it is not selected.
     slider_border: ((R, G, B), width, offset), None - The border that appears around the slider.
     accent background: pygame.Surface, (R, G, B), None, function - The background of the slider if it is_selected. If set to None, will be the same as normal background.
     slider_feature_font: str - The name of the font that should be used for the slider feature. Must lead to a valid font when used in pygame.font.Font().
@@ -30,7 +30,7 @@ class Slider(Buttons):
     slider_feature_colour: (R, G, B) - The colour of the feature / text on the slider.
     slider_feature_text: str - The feature / text that will be rendered to the slider.
     slider_size: "auto", int, (width, height) - The size of the slider. If set to "auto", will automatically fit the slider to the direction orthogonal to the orientation.
-    functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments.
+    functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments. If the Button itself is to be passed in as an argument, that argument can be passed in as '*self*'. This argument will automatically replaced when the function is actually called.
                     - "Click": Called when the Slider is clicked.
                     - "Release": Called when the Slider is released.
                     - "Move": Called when the Slider is moved to a new location. Only called by user input.

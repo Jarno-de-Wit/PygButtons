@@ -22,13 +22,13 @@ class Button(Buttons):
     font_name: str - The name of the font that should be used for the Button. Must lead to a valid font when used in pygame.font.Font().
     font_size: int - The size (in px) of the text.
     text_colour: (R, G, B) - The colour of the text the user types.
-    background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected. If a function is given, it will be called in Make_background as 'function(self)'.
+    background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected.
     border: ((R, G, B), width, offset), None - The border that appears around the TextBox.
     accent background: pygame.Surface, (R, G, B), None, function - The background of the Button if *.value. If set to None, will be the same as normal background.
     dragable: (horizotal, vertical) - A tuple of two booleans defining whether the Button is allowed to be moved in either the horizontal and / or vertical direction repectively.
     limits: (left, right, top, bottom) - The coordinate limits between which the Button is to be draggable.
     snap: ((x snap coords, ___), (y snapc coords, ___), snap_range) - If the button is dragable / movable, the positions to which the Button should snap, as well as the range (in px) within which the Button should snap to these locations.
-    functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments.
+    functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments. If the Button itself is to be passed in as an argument, that argument can be passed in as '*self*'. This argument will automatically replaced when the function is actually called.
                     - "Click": Called when the Button is clicked.
                     - "Release": Called when the Button is released. Available only when mode == "Hold" or mode == "Toggle".
                     - "Move": Called when the Button is dragged to a new location. Only available if any(dragable).

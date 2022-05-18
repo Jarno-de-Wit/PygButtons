@@ -23,11 +23,11 @@ class DropdownBox(Buttons):
     font_size: int - The size (in px) of the text.
     text_colour: (R, G, B) - The colour of the text in the DropdownBox.
     scroll_bar: None, int, Slider - The type of scrollbar to be included. Default styles 1 and 2 are available.
-    background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected. If a function is given, it will be called in Make_background as 'function(self)'.
+    background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected.
     border: ((R, G, B), width, offset), None - The border that appears around the buttons in the DropdownBox.
     accent background: pygame.Surface, (R, G, B), None, function - The background of the button if it is_selected. If set to None, will be the same as normal background.
     dropdown_background: pygame.Surface, (R, G, B), None, function - The background that is rendered behind the buttons on the dropdown section of the DropdownBox.
-    functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments.
+    functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments. If the Button itself is to be passed in as an argument, that argument can be passed in as '*self*'. This argument will automatically replaced when the function is actually called.
                     - "Select": Called whenever the DropdownBox is selected (dropped down).
                     - "Deselect": Called whenever the DropdownBox is deselected.
                     - "Update": Called whenever the state is changed.

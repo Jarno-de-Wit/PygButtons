@@ -19,11 +19,11 @@ class TextBox(Buttons):
     text_colour: (R, G, B) - The colour of the text the user types.
     hint_colour: (R, G, B) - The colour of the hint.
     text_offset: "auto", int, (x, y) - The offset the text should have from the sides of the TextBox. Prevents the text from overlapping with borders, and touching the edges.
-    background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected. If a function is given, it will be called in Make_background as 'function(self)'.
+    background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected.
     border: ((R, G, B), width, offset), None - The border that appears around the TextBox.
     accent background: pygame.Surface, (R, G, B), None, function - The background of the button if it is_selected. If set to None, will be the same as normal background.
     accent_border: ((R, G, B), width, offset), None - An additional border that can be drawn when the TextBox is selected.
-    functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments.
+    functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments. If the Button itself is to be passed in as an argument, that argument can be passed in as '*self*'. This argument will automatically replaced when the function is actually called.
                     - "Select": Called whenever the TextBox is selected.
                     - "Deselect": Called whenever the TextBox is deselected.
                     - "Type": Called every time a valid Key_down (one which could alter the contents of the TextBox) is recorded while this TextBox is selected.
