@@ -425,13 +425,15 @@ class Buttons():
             size = custom_size
             width, height = custom_size
         #Set the background surface for the button. If one is provided, use
-        #that one. Otherwise, make a new one with a solid color as given.
+        # that one. Otherwise, make a new one with a solid color as given.
         if type(inp) == pygame.Surface:
             return pygame.transform.scale(inp, self.scaled(size))
         elif inp is None:
             return pygame.Surface(self.scaled(size), pygame.SRCALPHA)
         elif hasattr(inp, "__call__"):
-            return inp(self)
+            return inp()
+        elif hasattr(inp[0], "__call__"): #If it is a tuple/list iterable with a function as its first item
+            return inp[0](*(arg if arg != "*self*" else self for arg in inp[1:]))
         else:
             if type(self.style) is int:
                 corner_radius = max(0, self.scaled(self.style))
@@ -499,7 +501,7 @@ class Buttons():
         except StopIteration:
             return output
         else: #Otherwise, the iterator was too long. Raise an error.
-            raise ValueError("Given value contains too many items")
+            raise ValueError("Given iterable contains too many items")
 
 
     @classmethod
@@ -538,7 +540,9 @@ class Buttons():
             return background
         elif not background: #Empty background
             return None
-        elif hasattr(background, "__call__"): #Allows the user to pass in a custom function to draw the background / Surface
+        elif hasattr(background, "__call__"): #If it is itself a function
+            return background
+        elif isinstance(background, (list, tuple)) and background and hasattr(background[0], "__call__"): #If it is a tuple / list with a function as its first item.
             return background
         else:
             cls.Verify_colour(background)
@@ -638,7 +642,7 @@ class Buttons():
         if not action in self.functions: #If no function was specified for this action, ignore the fact that this function was called anyway
             return
         if isinstance(self.functions[action], (tuple, list)):
-            self.functions[action][0](*self.functions[action][1:])
+            self.functions[action][0](*(arg if arg != "*self*" else self for arg in self.functions[action][1:]))
         else:
             self.functions[action]()
         return

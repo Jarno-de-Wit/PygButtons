@@ -98,7 +98,7 @@ class DropdownBox(Buttons):
         self.dropdown_bg = self.Verify_background(dropdown_background)
         self.display_length = display_length
         #Create the arrow button
-        self.arrow = Button((self.width - self.height, 0), (self.height, self.height), border = border, background = Arrow_bg, accent_background = None, style = style, mode = "Toggle", root = self.root, independent = True)
+        self.arrow = Button((self.width - self.height, 0), (self.height, self.height), border = border, background = (Arrow_bg, "*self*", self.bg, self.accent_bg), accent_background = None, style = style, mode = "Toggle", root = self.root, independent = True)
         self.arrow.func_data = dict(list(func_data.items()) + [("__bg", self.Verify_background(background),), ("__accent_bg", self.Verify_background(accent_background),)])
         self.children.append(self.arrow)
 
@@ -458,7 +458,7 @@ class DropdownBox(Buttons):
             return abs(self.display_length) * (self.height + self.spacing[1]) - self.spacing[1]
 
 
-def Arrow_bg(self):
+def Arrow_bg(self, bg, accent_bg):
     """
     The function that will create the background for the dropdown arrow button.
     For internal use only. This function is therefore also not imported by __init__.py
@@ -467,9 +467,9 @@ def Arrow_bg(self):
     if not self.func_data:
         surface = self.Make_background_surface(None)
     elif self.value:
-        surface = self.Make_background_surface(self.func_data["__accent_bg"])
+        surface = self.Make_background_surface(accent_bg)
     else:
-        surface = self.Make_background_surface(self.func_data["__bg"])
+        surface = self.Make_background_surface(bg)
 
     #Draw the arrow so characteristic to dropdown boxes
     if not self.value:
