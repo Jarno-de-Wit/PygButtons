@@ -27,7 +27,6 @@ class TextBox(Buttons):
                     - "Select": Called whenever the TextBox is selected.
                     - "Deselect": Called whenever the TextBox is deselected.
                     - "Type": Called every time a valid Key_down (one which could alter the contents of the TextBox) is recorded while this TextBox is selected.
-    func_data: dict - Contains potential additional data for use by custom background drawing functions.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
     root: None, Button - The Button that is considered the 'root element' for this Button. Any function calls that need to include a 'self' Button, will include this root Button instead.
     independent: bool - Determines whether or not the button is allowed to set the input_lock, and is added to buttons.list_all. Mostly important for buttons which are part of another button.
@@ -58,7 +57,6 @@ class TextBox(Buttons):
                  accent_background = None,
                  accent_border = ((0, 0, 0), 1, 2), #Set to None or False to disable
                  functions = {},
-                 func_data = {},
                  group = None,
                  root = None,
                  independent = False,
@@ -100,7 +98,6 @@ class TextBox(Buttons):
         self.__is_selected = False
         self.deselected = False
         self.functions = functions
-        self.func_data = func_data
         self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are set-up correctly
 
 

@@ -32,7 +32,6 @@ class DropdownBox(Buttons):
                     - "Deselect": Called whenever the DropdownBox is deselected.
                     - "Update": Called whenever the state is changed.
                     - "Move": Called whenever the dropdown area is scrolled.
-    func_data: dict - Contains potential additional data for use by custom background drawing functions.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
     root: None, Button - The Button that is considered the 'root element' for this Button. Any function calls that need to include a 'self' Button, will include this root Button instead.
     independent: bool - Determines whether or not the button is allowed to set the input_lock, and is added to buttons.list_all. Mostly important for buttons which are part of another button.
@@ -65,7 +64,6 @@ class DropdownBox(Buttons):
                  accent_background = (220, 220, 220),
                  dropdown_background = None,
                  functions = {},
-                 func_data = {},
                  group = None,
                  root = None,
                  independent = False
@@ -99,11 +97,10 @@ class DropdownBox(Buttons):
         self.display_length = display_length
         #Create the arrow button
         self.arrow = Button((self.width - self.height, 0), (self.height, self.height), border = border, background = (Arrow_bg, "*self*", self.bg, self.accent_bg), accent_background = None, style = style, mode = "Toggle", root = self.root, independent = True)
-        self.arrow.func_data = dict(list(func_data.items()) + [("__bg", self.Verify_background(background),), ("__accent_bg", self.Verify_background(accent_background),)])
         self.children.append(self.arrow)
 
         #Make the button containing the information about the currently selected option.
-        self.main_button = Button((0, 0), (self.width - self.height - self.spacing[0], self.height), font_name = font_name, font_size = font_size, border = border, background = background, accent_background = accent_background, style = style, func_data = func_data, root = self.root, independent = True)
+        self.main_button = Button((0, 0), (self.width - self.height - self.spacing[0], self.height), font_name = font_name, font_size = font_size, border = border, background = background, accent_background = accent_background, style = style, root = self.root, independent = True)
         self.children.append(self.main_button)
 
         if scroll_bar:
@@ -116,7 +113,6 @@ class DropdownBox(Buttons):
         self.text_colour = text_colour
 
         self.functions = functions
-        self.func_data = func_data
         #Add in all the options
         for option in options:
             self.Add_option(option)
@@ -247,7 +243,6 @@ class DropdownBox(Buttons):
                             font_name = self.font_name,
                             font_size = self.font_size,
                             border = self.border,
-                            func_data = self.func_data,
                             root = self.root,
                             independent = True
                             )
@@ -464,9 +459,7 @@ def Arrow_bg(self, bg, accent_bg):
     For internal use only. This function is therefore also not imported by __init__.py
     """
     #Just leave the making of the buttons background to the default function. Not gonna bother re-doing that here (because why would I?)
-    if not self.func_data:
-        surface = self.Make_background_surface(None)
-    elif self.value:
+    if self.value:
         surface = self.Make_background_surface(accent_bg)
     else:
         surface = self.Make_background_surface(bg)

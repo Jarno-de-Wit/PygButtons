@@ -32,7 +32,6 @@ class Button(Buttons):
                     - "Click": Called when the Button is clicked.
                     - "Release": Called when the Button is released. Available only when mode == "Hold" or mode == "Toggle".
                     - "Move": Called when the Button is dragged to a new location. Only available if any(dragable).
-    func_data: dict - Contains potential additional data for use by custom background drawing functions.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
     root: None, Button - The Button that is considered the 'root element' for this Button. Any function calls that need to include a 'self' Button, will include this root Button instead.
     independent: bool - Determines whether or not the button is allowed to set the input_lock, and is added to buttons.list_all. Mostly important for buttons which are part of another button.
@@ -60,7 +59,6 @@ class Button(Buttons):
                  limits = (None, None, None, None),
                  snap = ((), (), 0),
                  functions = {},
-                 func_data = {},
                  group = None,
                  root = None,
                  independent = False
@@ -94,7 +92,6 @@ class Button(Buttons):
         self.limits = list(value if value else ( (-1) ** (i + 1) * math.inf) for i, value in enumerate(limits))
         self.snap = self.Verify_iterable(snap, 3)
         self.functions = functions
-        self.func_data = func_data
         self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are prepared and set-up correctly
 
 
