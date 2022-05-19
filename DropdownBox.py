@@ -342,7 +342,7 @@ class DropdownBox(Buttons):
     @value.setter
     def value(self, value):
         if value in self.options:
-            self._state = self.options.index(value)
+            self.state = self.options.index(value)
         else:
             raise ValueError("Value not in options list")
 
