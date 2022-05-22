@@ -142,7 +142,7 @@ class TextBox(Buttons):
 
 
     def Key_down(self, event):
-        if event.key == pygame.K_RETURN:
+        if event.key in (pygame.K_RETURN, pygame.K_ESCAPE):
             self.is_selected = False
         elif event.key == pygame.K_BACKSPACE:
             self.text = self.text[:max(self.cursor - 1, 0)] + self.text[self.cursor:]
