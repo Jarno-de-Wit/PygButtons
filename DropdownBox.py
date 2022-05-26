@@ -394,7 +394,7 @@ class DropdownBox(Buttons):
     def scrolled(self):
         if self.scroll_bar and self.scroll_bar.moved:
             self.scrolled = round(self.scroll_bar.value)
-        return (self.__scrolled)
+        return self.__scrolled
 
     @scrolled.setter
     def scrolled(self, value):
@@ -417,7 +417,7 @@ class DropdownBox(Buttons):
 
     @property
     def is_selected(self):
-        return (self.arrow.value)
+        return self.arrow.value
 
     @is_selected.setter
     def is_selected(self, value):
