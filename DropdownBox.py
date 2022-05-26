@@ -188,6 +188,8 @@ class DropdownBox(Buttons):
         self.scrolled
         #If the box has been updated, re-draw this stuff:
         if self.updated:
+            #Set self.moved to True to make sure the dropdown_surface also gets updated to the latest state
+            self.moved = True
             #Draw the main / header surface
             #Re-draw self.surface (containing the header and the arrow)
             self.surface = self.Make_background_surface(None)
