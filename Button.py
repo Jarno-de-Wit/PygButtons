@@ -89,7 +89,7 @@ class Button(Buttons):
         self.border = self.Verify_border(border)
         self.dragable = self.Verify_iterable(dragable, 2, bool)
         limits = self.Verify_iterable(limits, 4)
-        self.limits = list(value if value else ( (-1) ** (i + 1) * math.inf) for i, value in enumerate(limits))
+        self.limits = list(value if value is not None else ( (-1) ** (i + 1) * math.inf) for i, value in enumerate(limits))
         self.snap = self.Verify_iterable(snap, 3)
         self.functions = functions
         self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are prepared and set-up correctly
