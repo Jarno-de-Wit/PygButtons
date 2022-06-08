@@ -103,8 +103,7 @@ class TextBox(Buttons):
 
     def LMB_down(self, pos):
         if self.contains(pos):
-            self.Buttons.input_claim = True
-            self.Buttons.input_processed = True
+            self.Claim_input()
             if self.is_selected:
                 pos = self.relative(pos)
                 #If there is any text: (Check required since for loop has to run at least once to not crash)
@@ -114,7 +113,6 @@ class TextBox(Buttons):
                     pixel_offset = - self.text_scroll + self.scaled(max(self.border[1] + self.border[2] + round(self.font_size / 4), self.accent_border[1] + self.accent_border[2] + round(self.font_size / 4)), True)
                     for letter_nr, letter in enumerate(self.text):
                         pixel_length = self.font.size(self.text[:letter_nr + 1])[0]
-                        #Subtract the ####WHAT
                         if (pixel_length + pixel_offset) >= pos[0]:
                             break
                     #Calculate the horizontal distance from the cursor to the text box
@@ -177,18 +175,18 @@ class TextBox(Buttons):
         super().Move(offset, self, scale)
 
 
-    def Draw(self, screen):
+    def Draw(self, screen, pos = None):
         """
         Draw the button to the screen.
         """
+        pos = pos or self.scaled(self.topleft)
         if self.updated:
+            self.update_scroll()
             #Draw the correct background onto the surface
             if not self.is_selected:
                 self.surface = self.Make_background_surface(self.bg)
-                ##self.surface = pygame.transform.scale(self.bg, self.scaled(self.size, True))
             else:
                 self.surface = self.Make_background_surface(self.accent_bg)
-                ##self.surface = pygame.transform.scale(self.accent_bg, self.scaled(self.size, True))
             #Draw a border, if it is enabled
             if self.border:
                 self.Draw_border(self.surface, *self.border)
@@ -197,12 +195,14 @@ class TextBox(Buttons):
                 self.Draw_border(self.surface, *self.accent_border)
 
             #Add the text to the surface
-            text_limiter = pygame.Surface(self.offset(self.scaled(self.size, True), self.scaled(self.text_offset), (-2, -2)), pygame.SRCALPHA)
+            text_limiter = pygame.Surface(self.offset(self.true_size, self.scaled(self.text_offset), (-2, -2)), pygame.SRCALPHA)
+            self.s = text_limiter
             limiter_rect = text_limiter.get_rect()
             if self.text:
                 text_surface = self.font.render(self.text, True, self.text_colour)
             else:
                 text_surface = self.font.render(self.hint, True, self.hint_colour)
+            self.t = text_surface
             text_rect = text_surface.get_rect()
             #Align the text rect
             text_rect.centery = limiter_rect.centery
@@ -214,7 +214,7 @@ class TextBox(Buttons):
 
             #Make the cursor surface
             self.cursor_surface = self.surface.copy()
-            cursor_rect = pygame.Rect((10, 0), (self.scaled(1), self.font_size))
+            cursor_rect = pygame.Rect((10, 0), (max(1, self.scaled(1)), self.font.get_height()))
             cursor_rect.centery = self.middle[1]
             cursor_rect.left = self.font.size(self.text[:self.cursor])[0] - self.text_scroll + self.scaled(self.text_offset[0])
             pygame.draw.rect(self.cursor_surface, self.text_colour,  cursor_rect)
@@ -226,9 +226,9 @@ class TextBox(Buttons):
             #Update the cursor animation
             self.cursor_animation = (self.cursor_animation + 1) % self.framerate
         if self.cursor_animation < round(self.framerate / 2):
-            screen.blit(self.cursor_surface, self.scaled(self.topleft, True))
+            screen.blit(self.cursor_surface, pos)
         else:
-            screen.blit(self.surface, self.scaled(self.topleft, True))
+            screen.blit(self.surface, pos)
         return
 
 
@@ -328,7 +328,7 @@ class TextBox(Buttons):
         #Always add this +1, to prevent annoying 1-pixel shifts when moving the cursor to the final position.
         text_width = self.font.size(self.text)[0] + 1
         #Get the width of the text limiter surface
-        limiter_width = self.width - 2 * self.text_offset[0]
+        limiter_width = self.true_width - self.scaled(2 * self.text_offset[0])
         #Get the cursor pixel index; +1 not required since 'size' already includes index 0 as width 1
         cursor_pos = self.font.size(self.text[:self.cursor])[0]
         #If all text fits in the view window:

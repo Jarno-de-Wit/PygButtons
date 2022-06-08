@@ -148,6 +148,11 @@ class Buttons():
         if claim:
             self.Buttons.input_claim = True
 
+    @classmethod
+    def Claim_input(cls):
+        cls.Buttons.input_claim = True
+        cls.Buttons.input_processed = True
+
 
     @classmethod
     def Event(cls, event, group = all):
@@ -413,23 +418,25 @@ class Buttons():
         return max(minimum, min(value, maximum))
 
 
-    def Make_background_surface(self, inp, custom_size = None):
+    def Make_background_surface(self, inp, custom_size = None, scale_custom = False):
         """
         Makes a solid fill background if a colour was provided. If a surface was provided, returns that instead.
-        If custom_size is set, will use that size instead of self.size. (scaling will still be applied to custom_size).
+        If custom_size is set, will use that size instead of self.true_size.
+        If scale_custom is True, and a custom size is given, that custom size will be scaled first.
         """
         if not custom_size:
-            size = self.size
-            width, height = self.size
+            size = self.true_size
+        elif scale_custom:
+            size = self.scaled(custom_size)
         else:
             size = custom_size
-            width, height = custom_size
+        width, height = size
         #Set the background surface for the button. If one is provided, use
         # that one. Otherwise, make a new one with a solid color as given.
         if type(inp) == pygame.Surface:
-            return pygame.transform.scale(inp, self.scaled(size))
+            return pygame.transform.scale(inp, size)
         elif inp is None:
-            return pygame.Surface(self.scaled(size), pygame.SRCALPHA)
+            return pygame.Surface(size, pygame.SRCALPHA)
         elif hasattr(inp, "__call__"):
             return inp()
         elif hasattr(inp[0], "__call__"): #If it is a tuple/list iterable with a function as its first item
@@ -440,38 +447,42 @@ class Buttons():
             elif self.style.lower() == "square":
                 corner_radius = 0
             elif self.style.lower() == "round":
-                corner_radius = self.scaled(min(width, height) / 2)
+                corner_radius = min(size)
             elif self.style.lower() == "smooth":
-                corner_radius = 12
+                corner_radius = self.scaled(12)
             else:
                 raise ValueError(f"Invalid style value {self.style}")
 
-            surface = pygame.Surface(self.scaled(size), pygame.SRCALPHA)
-            pygame.draw.rect(surface, inp, ((0, 0), self.scaled(size)), border_radius = corner_radius)
+            surface = pygame.Surface(size, pygame.SRCALPHA)
+            pygame.draw.rect(surface, inp, ((0, 0), size), border_radius = corner_radius)
             return surface
 
 
-    def Draw_border(self, surface, colour, border_width = 1, border_offset = 0):
+    def Draw_border(self, surface, colour, border_width = 1, border_offset = 0, custom_size = None):
         """
         Draws a border around a surface.
         """
+        border_offset = self.scaled(border_offset)
+        border_width = self.scaled(border_width)
+
+        if not border_width: #If after scaling, the border width is 0, don't try to draw anything, as doing so would colour the entire button.
+            return
+
         style = self.style
+        if custom_size:
+            size = custom_size
+        else:
+            size = self.true_size
         if type(style) is int:
-            corner_radius = max(0, self.scaled(style - border_offset))
+            corner_radius = max(0, self.scaled(style) - border_offset)
         elif style.lower() == "square":
             corner_radius = 0
         elif style.lower() == "round":
-            corner_radius = self.scaled(min(self.width, self.height) / 2)
+            corner_radius = min(size)
         elif style.lower() == "smooth":
-            corner_radius = 10
+            corner_radius = max(0, self.scaled(12) - border_offset)
 
-        border_width = self.scaled(border_width)
-        if not border_width: #If after scaling, the border width is 0, don't try to draw it, as doing so would colour the entire button.
-            return
-        border_offset = self.scaled(border_offset)
-        corner_radius = self.scaled(corner_radius)
-
-        pygame.draw.rect(surface, colour, (self.scaled((border_offset, border_offset)), self.scaled(self.offset(self.size, (border_offset, border_offset), (-2, -2)))), border_width, corner_radius)
+        pygame.draw.rect(surface, colour, (2*(border_offset,), self.offset(size, 2*(border_offset,), (-2, -2))), border_width, corner_radius)
 
 
     @staticmethod
@@ -730,7 +741,7 @@ class Buttons():
         """
         The middle of the button, pre-scaled.
         """
-        return self.scaled(tuple(i / 2 for i in self.size))
+        return tuple(round(i / 2) for i in self.true_size)
 
 
     #Setter for all main positions of the button, much like a pygame.rect
@@ -783,12 +794,22 @@ class Buttons():
     def top(self, value):
         if not isinstance(value, (int, float)):
             raise TypeError(f"'top' must by type 'int' or 'float', not type '{type(value).__name__}'")
+        try:
+            for child in self.children:
+                child._move((0, value - self.top)) #Move children along with the main Button
+        except AttributeError: pass #Catch error raised when .top is first set in __init__
         self.__top = value
+        self.updated = True #Update button since moving might cause true_size to change
     @left.setter
     def left(self, value):
         if not isinstance(value, (int, float)):
             raise TypeError(f"'left' must by type 'int' or 'float', not type '{type(value).__name__}'")
+        try:
+            for child in self.children:
+                child._move((value - self.left, 0)) #Move children along with the main Button
+        except AttributeError: pass #Catch error raised when .left is first set in __init__
         self.__left = value
+        self.updated = True#Update button since moving might cause true_size to change
     @right.setter
     def right(self, value):
         if not isinstance(value, (int, float)):
@@ -817,6 +838,18 @@ class Buttons():
         self.__height = value
         self.updated = True
 
+    #"True" size properties are used to prevent artifacting issues during scaling.
+    # Although often the same as self.scaled(self.size), sometimes these will differ by a pixel due to rounding.
+    @property
+    def true_width(self):
+        return self.scaled(self.right) - self.scaled(self.left)
+    @property
+    def true_height(self):
+        return self.scaled(self.bottom) - self.scaled(self.top)
+    @property
+    def true_size(self):
+        return (self.true_width, self.true_height)
+
 
     def get_rect(self):
         """
@@ -828,7 +861,7 @@ class Buttons():
         """
         Returns a pygame.Rect object of the scaled button rectangle.
         """
-        return pygame.Rect(self.scaled(self.topleft), self.scaled(self.size))
+        return pygame.Rect(self.scaled(self.topleft), self.true_size)
 
 
 

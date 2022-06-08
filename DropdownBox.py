@@ -83,7 +83,6 @@ class DropdownBox(Buttons):
         self.__state = -1
         self.__scrolled = 0
         self.new_state = False
-        self.updated = True
         self.moved = True
 
         if type(button_spacing) in (int, float):
@@ -96,11 +95,11 @@ class DropdownBox(Buttons):
         self.dropdown_bg = self.Verify_background(dropdown_background)
         self.display_length = display_length
         #Create the arrow button
-        self.arrow = Button((self.width - self.height, 0), (self.height, self.height), border = border, background = (Arrow_bg, "*self*", self.bg, self.accent_bg), accent_background = None, style = style, mode = "Toggle", root = self.root, independent = True)
+        self.arrow = Button((self.right - self.height, self.top), (self.height, self.height), border = border, background = (Arrow_bg, "*self*", self.bg, self.accent_bg), accent_background = None, style = style, mode = "Toggle", root = self.root, independent = True)
         self.children.append(self.arrow)
 
         #Make the button containing the information about the currently selected option.
-        self.main_button = Button((0, 0), (self.width - self.height - self.spacing[0], self.height), font_name = font_name, font_size = font_size, border = border, background = background, accent_background = accent_background, style = style, root = self.root, independent = True)
+        self.main_button = Button(self.topleft, (self.width - self.height - self.spacing[0], self.height), font_name = font_name, font_size = font_size, border = border, background = background, accent_background = accent_background, style = style, root = self.root, independent = True)
         self.children.append(self.main_button)
 
         if scroll_bar:
@@ -120,57 +119,49 @@ class DropdownBox(Buttons):
 
 
     def LMB_down(self, pos):
-        #Set the relative position in the header, and the "dropdown relative position", in the dropdown field
-        rel_pos = self.relative(pos)
-        dd_rel_pos = tuple(round(i) for i in self.offset(self.relative(pos), self.scaled((0, - self.height - self.spacing[1] + self.scrolled), False)))
-        sldr_rel_pos = tuple(round(i) for i in self.offset(self.relative(pos), self.scaled((0, - self.height - self.spacing[1]), False)))
         #Test if any of the two header boxes was clicked:
-        if self.main_button.contains(rel_pos):
-            self.Buttons.input_claim = True
+        if self.main_button.contains(pos):
+            self.Claim_input()
             self.is_selected = not self.is_selected
             self.updated = True
-        elif self.arrow.contains(rel_pos):
-            self.Buttons.input_claim = True
+        elif self.arrow.contains(pos):
+            self.Claim_input()
             self.is_selected = not self.is_selected
             self.updated = True
+        #Test if the scroll_bar (if any) contained the location
+        elif self.scroll_bar and self.scroll_bar.contains(pos):
+            self.scroll_bar.LMB_down(pos)
+            self.Set_lock()
         #Test if the any of the buttons in the dropdown space contain the clicking point
-        elif self.is_selected and self.is_within(pos, self.scaled((self.left, self.bottom + self.spacing[1])), self.scaled((self.right - (self.scroll_bar.width + self.spacing[0] if self.scroll_bar else 0), self.bottom + self._display_pixel_length + self.spacing[1]))):
+        elif self.is_selected and self.is_within(pos, (self.scaled(self.left), self.scaled(self.bottom) + self.scaled(self.spacing[1])), (self.scaled(self.right), self.scaled(self.bottom) + self.scaled(self.spacing[1]) + self._true_pixel_length)):
             #Claim the input. Even if no button is "hit", it was within the surface of the dropdown box
-            self.Buttons.input_claim = True
+            self.Claim_input()
             #Calculate the new relative pos, when it is taken relative to the dropdown spaces' coordinates
             for button_nr, button in enumerate(self.button_list):
-                if button.contains(dd_rel_pos):
+                if button.contains((pos[0], pos[1] + self.scrolled_px)):
                     self.state = button_nr
                     self.is_selected = False
                     #Stop checking from here, as no buttons overlap, thus no other buttons will .contain(rel_pos)
                     return
-        elif self.scroll_bar and self.scroll_bar.contains(sldr_rel_pos):
-            self.scroll_bar.LMB_down(sldr_rel_pos)
-            self.Set_lock()
         elif self.is_selected:
             self.is_selected = False
 
     def LMB_up(self, pos):
-        dd_rel_pos = tuple(round(i) for i in self.offset(self.relative(pos), self.scaled((0, - self.height - self.spacing[1] + self.scrolled), False)))
-        sldr_rel_pos = tuple(round(i) for i in self.offset(self.relative(pos), self.scaled((0, - self.height - self.spacing[1]), False)))
         if self.scroll_bar:
-            self.scroll_bar.LMB_up(sldr_rel_pos)
-            if self.Buttons.input_claim:
-                self.Release_lock()
+            self.scroll_bar.LMB_up(pos)
 
     def Set_cursor_pos(self, pos):
-        sldr_rel_pos = tuple(round(i) for i in self.offset(self.relative(pos), self.scaled((0, - self.height - self.spacing[1]), False)))
         if self.scroll_bar:
-            self.scroll_bar.Set_cursor_pos(sldr_rel_pos)
+            self.scroll_bar.Set_cursor_pos(pos)
 
 
     def Scroll(self, value, pos):
         if self.arrow.value: #If self is selected / the menu is expanded downwards
             if self.contains(pos):
                 pass
-            elif self.is_within(pos, self.scaled((self.left, self.bottom + self.spacing[1])), self.scaled((self.right - (self.scroll_bar.width + self.spacing[0] if self.scroll_bar else 0), self.bottom + self._display_pixel_length + self.spacing[1]))): #If the position lies withing the expanded section, perform scrolling.
-                self.scrolled += value
-                self.Buttons.input_claim = True
+            elif self.is_within(pos, (self.scaled(self.left), self.scaled(self.bottom) + self.scaled(self.spacing[1])), (self.scaled(self.right), self.scaled(self.bottom) + self.scaled(self.spacing[1]) + self._true_pixel_length)): #If the position lies withing the expanded section, perform scrolling.
+                self.scrolled_px += self.Buttons.scroll_factor * value
+                self.Claim_input()
 
 
     def Scale(self, scale, relative_scale = True):
@@ -181,10 +172,16 @@ class DropdownBox(Buttons):
         super().Move(offset, self, scale)
 
 
-    def Draw(self, screen):
+    def Draw(self, screen, pos = None):
         """
         Draw the button to the screen.
         """
+        #Set the correct position for the dropdown_surface
+        dropdown_pos = (self.scaled(self.left), self.scaled(self.bottom) + self.scaled(self.spacing[1]))
+        if pos is not None:
+            offset = self.offset(pos, self.scaled(self.topleft), (-1, -1))
+            dropdown_pos = self.offset(dropdown_pos, offset)
+
         self.scrolled
         #If the box has been updated, re-draw this stuff:
         if self.updated:
@@ -193,30 +190,30 @@ class DropdownBox(Buttons):
             #Draw the main / header surface
             #Re-draw self.surface (containing the header and the arrow)
             self.surface = self.Make_background_surface(None)
-            self.main_button.Draw(self.surface)
-            self.arrow.Draw(self.surface)
+            self.main_button.Draw(self.surface, (0, 0))
+            self.arrow.Draw(self.surface, (self.true_width - self.arrow.true_width, 0))
 
             #Re-build the button surface
-            #Re-draw self.button_surface (the pre-rendered surface containing ALL buttons underneath each other)
-            self.button_surface = pygame.Surface(self.scaled((self.width - (self.scroll_bar.width + self.spacing[0] if self.scroll_bar else 0), len(self.options) * (self.height + self.spacing[1]) - self.spacing[1])), pygame.SRCALPHA)
+            #Re-draw self.button_surface (the pre-rendered surface containing ALL buttons stacked underneath each other)
+            self.button_surface = pygame.Surface((self.true_width - (self.scroll_bar.true_width if self.scroll_bar else 0), self.scaled(self.button_list[-1].bottom) - self.scaled(self.button_list[0].top) if self.button_list else 0), pygame.SRCALPHA)
             for button in self.button_list:
-                button.Draw(self.button_surface)
+                button.Draw(self.button_surface, (0, button.scaled(button.top) - self.scaled(self.button_list[0].top)))
 
             self.updated = False
 
         if self.moved:
             #re-draw self.dropdown_surface (The cut-to-size version of self.button_surface), including the potential scroll_bar
-            self.dropdown_surface = self.Make_background_surface(self.dropdown_bg, (self.width, self._display_pixel_length))
-            self.dropdown_surface.blit(self.button_surface, (0, self.scaled(-self.scrolled)))
+            self.dropdown_surface = self.Make_background_surface(self.dropdown_bg, (self.true_width, self._true_pixel_length))
+            self.dropdown_surface.blit(self.button_surface, (0, -self.scrolled_px))
             if self.scroll_bar:
-                self.scroll_bar.Draw(self.dropdown_surface)
+                self.scroll_bar.Draw(self.dropdown_surface, (self.true_width - self.scroll_bar.true_width, 0))
 
             self.moved = False
 
 
-        screen.blit(self.surface, self.scaled(self.topleft))
         if self.is_selected:
-            screen.blit(self.dropdown_surface, self.scaled((self.left, self.bottom + self.spacing[1])))
+            screen.blit(self.dropdown_surface, dropdown_pos)
+        screen.blit(self.surface, pos or self.scaled(self.topleft))
         return
 
 
@@ -235,7 +232,7 @@ class DropdownBox(Buttons):
         else:
             index = len(self.options)
         self.options.insert(index, value)
-        new_button = Button((0, index * (self.height + self.spacing[1])),
+        new_button = Button((self.left, self.bottom + self.spacing[1] + index * (self.height + self.spacing[1])),
                             (self.width - (self.scroll_bar.width + self.spacing[0] if self.scroll_bar else 0), self.height),
                             text = str(value),
                             style = self.style,
@@ -250,6 +247,7 @@ class DropdownBox(Buttons):
                             )
         self.button_list.insert(index, new_button)
         self.children.append(new_button)
+        new_button.scale = self.scale
 
         #Move all following buttons down (if necessary) to make space for the new button
         for button in self.button_list[index + 1:]:
@@ -270,8 +268,7 @@ class DropdownBox(Buttons):
                 self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(len(self.options), self.display_length) / len(self.options)))
             else:
                 self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(1, -self.display_length / len(self.options))))
-            self.scroll_bar.slider.limits = self.scroll_bar.slider.limits[:2] + [0, self._display_pixel_length]
-            self.scroll_bar.value_range = (0, max(0, len(self.options) * (self.height + self.spacing[1]) - self.spacing[1]) - self._display_pixel_length)
+            self.scroll_bar.slider.limits[3] = self.scroll_bar.bottom
         return
 
 
@@ -328,8 +325,7 @@ class DropdownBox(Buttons):
                 self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(len(self.options), self.display_length) / len(self.options)))
             else:
                 self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(1, -self.display_length / len(self.options))))
-            self.scroll_bar.slider.limits = self.scroll_bar.slider.limits[:2] + [0, self._display_pixel_length]
-            self.scroll_bar.value_range = (0, max(0, len(self.options) * (self.height + self.spacing[1]) - self.spacing[1]) - self._display_pixel_length)
+            self.scroll_bar.slider.limits[3] = self.scroll_bar.bottom #Update the bottom limit of the scroll_bar slider
 
         return True
 
@@ -340,7 +336,6 @@ class DropdownBox(Buttons):
             return self.options[self._state]
         else:
             return -1
-
     @value.setter
     def value(self, value):
         if value in self.options:
@@ -374,7 +369,6 @@ class DropdownBox(Buttons):
     @property
     def state(self):
         return self.__state
-
     @state.setter
     def state(self, value):
         self._state = value
@@ -385,7 +379,6 @@ class DropdownBox(Buttons):
         new_state = self.__new_state
         self.__new_state = False
         return new_state
-
     @new_state.setter
     def new_state(self, value):
         self.__new_state = True
@@ -395,26 +388,39 @@ class DropdownBox(Buttons):
     @property
     def scrolled(self):
         if self.scroll_bar and self.scroll_bar.moved:
-            self.scrolled = round(self.scroll_bar.value)
+            self.__scrolled = self.scroll_bar.value
+            self.moved = True
         return self.__scrolled
 
     @scrolled.setter
     def scrolled(self, value):
-        max_scroll_height = max(0, len(self.options) * (self.height + self.spacing[1]) - self.spacing[1] - self._display_pixel_length) #Get the total height of all text in the text box
-
         #Make sure the scrolled value cannot exceed the limits of the space in the box
-        value = round(self.Clamp(value, 0, max_scroll_height))
+        value = self.Clamp(value, 0, 1)
         self.moved = True
 
-        #Return if the scroll value has not been updated
-        if value == self.__scrolled:
-            return
-
         self.__scrolled = value
-
         if self.scroll_bar:
             self.scroll_bar.value = value
-        return
+
+    @property
+    def scrolled_px(self):
+        #Calculate the required height (in px)
+        req_height = 0 if not self.options else self.scaled(self.button_list[-1].bottom) - self.scaled(self.button_list[0].top)
+        #Calculate the required height change that has to be accomodated by scrolling (in px)
+        max_scroll_height = max(0, req_height - self._true_pixel_length) #Get the total distance (in px) the surface must be scrolled
+
+        return round(max_scroll_height * self.scrolled)
+
+    @scrolled_px.setter
+    def scrolled_px(self, value):
+        #Calculate the required height (in px)
+        req_height = 0 if not self.options else self.scaled(self.button_list[-1].bottom) - self.scaled(self.button_list[0].top)
+        #Calculate the required height change that has to be accomodated by scrolling (in px)
+        max_scroll_height = max(0, req_height - self._true_pixel_length) #Get the total distance (in px) the surface must be scrolled
+
+        #Only update the scrolled value, if the DD can be scrolled
+        if max_scroll_height:
+            self.scrolled = value / max_scroll_height
 
 
     @property
@@ -454,6 +460,15 @@ class DropdownBox(Buttons):
         else:
             return abs(self.display_length) * (self.height + self.spacing[1]) - self.spacing[1]
 
+    @property
+    def _true_pixel_length(self):
+        """
+        The true / scaled pixel length of the dropdown_surface.
+        """
+        if self.scroll_bar:
+            return self.scroll_bar.true_height
+        else:
+            return self.scaled(self.bottom + self.spacing[1] + self._display_pixel_length) - self.scaled(self.bottom + self.spacing[1])
 
 def Arrow_bg(self, bg, accent_bg):
     """
@@ -469,15 +484,15 @@ def Arrow_bg(self, bg, accent_bg):
     #Draw the arrow so characteristic to dropdown boxes
     if not self.value:
         arrow_coords = (
-            (self.scaled(self.width * 1/6), self.scaled(self.height * 1/3)), #Top left
-            (self.scaled(self.width * 1/2), self.scaled(self.height * 2/3)), #Bottom
-            (self.scaled(self.width * 5/6), self.scaled(self.height * 1/3)), #Top right
+            (round(self.true_width * 1/6), round(self.true_height * 1/3)), #Top left
+            (round(self.true_width * 1/2), round(self.true_height * 2/3)), #Bottom
+            (round(self.true_width * 5/6), round(self.true_height * 1/3)), #Top right
             )
     else:
         arrow_coords = (
-            (self.scaled(self.width * 1/6), self.scaled(self.height * 2/3)), #Bottom left
-            (self.scaled(self.width * 1/2), self.scaled(self.height * 1/3)), #Top
-            (self.scaled(self.width * 5/6), self.scaled(self.height * 2/3)), #Bottom right
+            (round(self.true_width * 1/6), round(self.true_height * 2/3)), #Bottom left
+            (round(self.true_width * 1/2), round(self.true_height * 1/3)), #Top
+            (round(self.true_width * 5/6), round(self.true_height * 2/3)), #Bottom right
             )
     pygame.draw.polygon(surface, self.border[0] if self.border else (63, 63, 63), arrow_coords)
 
@@ -490,14 +505,14 @@ def Make_scroll_bar(self, scroll_bar):
     For internal use only. This function is therefore also not imported by __init__.py
     """
     if isinstance(scroll_bar, Slider):
-        scroll_bar.right = self.width
+        scroll_bar.right = self.right
         scroll_bar.height = self._display_pixel_length
-        scroll_bar.top = 0
+        scroll_bar.top = self.bottom
         scroll_bar.root = self.root
         return scroll_bar
     if scroll_bar == 1:
         size = (15, self._display_pixel_length)
-        pos = (self.width - size[0], 0)
+        pos = (self.right - size[0], self.bottom)
         style = "Round"
         background = None
         border = None
@@ -507,7 +522,7 @@ def Make_scroll_bar(self, scroll_bar):
         return Slider(pos, size, style = style, background = background, border = border, slider_background = slider_bg, slider_border = slider_border, orientation = 1, root = self.root, independent = True)
     elif scroll_bar == 2:
         size = (15, self._display_pixel_length)
-        pos = (self.width - size[0], 0)
+        pos = (self.right - size[0], self.bottom)
         slider_feature_text = "|||"
         slider_feature_size = 9
         return Slider(pos, size, slider_feature_text = slider_feature_text, slider_feature_size = slider_feature_size, orientation = 1, root = self.root, independent = True)

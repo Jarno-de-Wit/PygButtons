@@ -107,8 +107,7 @@ class Button(Buttons):
             elif self.mode == "hold":
                 self.Set_lock()
                 self.value = True
-            self.Buttons.input_claim = True
-            self.Buttons.input_processed = True
+            self.Claim_input()
             if any(self.dragable):
                 self.drag_pos = self.relative(pos)
 
@@ -164,7 +163,7 @@ class Button(Buttons):
         super().Move(offset, self, scale)
 
 
-    def Draw(self, screen):
+    def Draw(self, screen, pos = None):
         """
         Draw the button to the screen.
         """
@@ -180,7 +179,8 @@ class Button(Buttons):
             #Draw the text onto the surface
             if self.text:
                 #Make a surface that fits within the border
-                text_limiter = pygame.Surface(self.Clamp(self.offset(self.scaled(self.size), 2 * (self.scaled(self.border[1] + self.border[2] + self.font_size / 4),), (-2, -2)), 0, math.inf), pygame.SRCALPHA)
+                text_offset = self.scaled(self.border[1] + self.border[2] + self.font_size / 4 if self.border else self.font_size / 4)
+                text_limiter = pygame.Surface(self.Clamp(self.offset(self.true_size, 2 * (text_offset,), (-2, -2)), 0, math.inf), pygame.SRCALPHA)
                 limiter_rect = text_limiter.get_rect()
                 text_surface = self.font.render(self.text, True, self.text_colour)
 
@@ -195,7 +195,7 @@ class Button(Buttons):
 
             #Clear self.updated again, as the surface has been remade.
             self.updated = False
-        screen.blit(self.surface, self.scaled(self.topleft))
+        screen.blit(self.surface, pos or self.scaled(self.topleft))
         return
 
     def _move(self, value):

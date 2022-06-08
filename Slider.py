@@ -156,10 +156,18 @@ class Slider(Buttons):
         super().Move(offset, self, scale)
 
 
-    def Draw(self, screen):
+    def Draw(self, screen, pos = None):
         """
         Draw the button to the screen.
         """
+        #Set draw positions for when a custom location is given
+        if pos is not None:
+            slider_pos = self.offset(self.slider.scaled(self.slider.topleft), self.offset(pos, self.scaled(self.topleft), (-1, -1)))
+        else:
+            pos = self.scaled(self.topleft)
+            slider_pos = None
+
+        #Update the button surface (if necessary)
         if self.updated:
             #Now, let's actually construct the surface
             self.surface = self.Make_background_surface(self.bg)
@@ -168,20 +176,20 @@ class Slider(Buttons):
 
             if self.markings:
                 #Set up the information of the marking itself
-                marking_height = self.scaled(self.rotated(self.size)[1])
+                marking_height = self.rotated(self.true_size)[1]
                 marking_width = self.scaled(1)
                 marking_rect = pygame.Rect((0,0), self.rotated((marking_width, marking_height)))
 
                 #Iterate over all markings, and draw them
                 for coord in self.Marking_coords():
                     coord = self.scaled(coord)
-                    marking_rect.center = self.rotated(coord, self.rotated(self.size)[1] / 2)
+                    marking_rect.center = self.rotated(coord, self.rotated(self.true_size)[1] / 2)
                     pygame.draw.rect(self.surface, self.marking_colour, marking_rect)
 
             self.updated = False
 
-        screen.blit(self.surface, self.scaled(self.topleft))
-        self.slider.Draw(screen)
+        screen.blit(self.surface, pos)
+        self.slider.Draw(screen, slider_pos)
         return
 
 
@@ -269,14 +277,15 @@ class Slider(Buttons):
     def _value(self):
         #Note: No need to run ._Call() anywhere in this code. The fact that the .__value is only updated here isn't important. It was already called when the slider was actually moved.
         if self._moved: #If the user clicked on the slider, the value should be re-calculated from the slider position. If not, the value should be exactly what the user set.
-            pos = round(self.rotated(self.relative(self.scaled(self.slider.topleft)))[0])
-            coord_range = self.scaled(self.rotated(self.size)[0] - self.rotated(self.slider.size)[0]) #The available pixels for the slider to move in
+            pos = round(self.rotated(self.offset(self.slider.topleft, self.topleft, (-1, -1)))[0])
+            coord_range = self.rotated(self.size)[0] - self.rotated(self.slider.size)[0] #The available pixels for the slider to move in
             if coord_range == 0: #If the slider is the same size as the overall button, pre-emptively catch it to prevent a ZeroDivisionError
                 self.__value = sum(self.value_range) / 2
             else:
                 self.__value = self.Clamp(self.value_range[0] + pos / coord_range * (self.value_range[1] - self.value_range[0]), *sorted(self.value_range))
             self._moved = False
         return self.__value
+
     @_value.setter
     def _value(self, val):
         val = self.Clamp(val, *sorted(self.value_range))
@@ -291,6 +300,7 @@ class Slider(Buttons):
     @property
     def value(self):
         return self._value
+
     @value.setter
     def value(self, val):
         self._value = val
@@ -314,24 +324,6 @@ class Slider(Buttons):
     @moved.setter
     def moved(self, value):
         self.__moved = value
-
-
-    @property #Properties required to be able to overwrite setters
-    def left(self):
-        return super().left
-    @property
-    def top(self):
-        return super().top
-    @left.setter
-    def left(self, value):
-        try: self.slider._move((value - self.left, 0)) #Move the slider along with the main Slider's body
-        except AttributeError: pass #Catch error raised when .left is first set in __init__
-        self.Buttons.left.fset(self, value) #Pass the value on to the base class' setter
-    @top.setter
-    def top(self, value):
-        try: self.slider._move((0, value - self.top))
-        except AttributeError: pass #Catch error raised when .top is first set in __init__
-        self.Buttons.top.fset(self, value)
 
 
 def Make_slider(self, style, size, background, accent_background, border, markings, edge_markings, snap_radius, feature_text, feature_colour, feature_font, feature_size, orientation):
