@@ -25,7 +25,7 @@ class Slider(Buttons):
     slider_background: pygame.Surface, (R, G, B), None, function - The background of the slider if it is not selected.
     slider_border: ((R, G, B), width, offset), None - The border that appears around the slider.
     accent background: pygame.Surface, (R, G, B), None, function - The background of the slider if it is_selected. If set to None, will be the same as normal background.
-    slider_feature_font: str - The name of the font that should be used for the slider feature. Must lead to a valid font when used in pygame.font.Font().
+    slider_feature_font: str - The name of the font that should be used for the slider feature.
     slider_feature_size: int - The size (in px) of the sliders' feature text.
     slider_feature_colour: (R, G, B) - The colour of the feature / text on the slider.
     slider_feature_text: str - The feature / text that will be rendered to the slider.

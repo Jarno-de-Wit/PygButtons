@@ -14,7 +14,7 @@ class Text(Buttons):
     size: (width, height) - The size before scaling.
     text: str - The text that will be rendered to the surface.
     style: "Square", "Round", int - Defines the radius of curvature of the buttons' corners.
-    font_name: str - The name of the font that should be used for the Text. Must lead to a valid font when used in pygame.font.Font().
+    font_name: str - The name of the font that should be used for the Text.
     font_size: int - The size (in px) of the text.
     text_colour: (R, G, B) - The colour of the text in the Text object.
     text_offset: "auto", int, (x, y) - The offset the text should have from the sides of the Text object. Prevents the text from overlapping with borders, and touching the edges.

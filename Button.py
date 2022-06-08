@@ -19,7 +19,7 @@ class Button(Buttons):
               - "Hold": Stays True until the Mouse Button is released.
     orientation: int - The orientation of the text. If orientation == 0, the text will be horizontal; if orientation == 1, the text will be vertical.
     style: "Square", "Round", int - Defines the radius of curvature of the buttons' corners.
-    font_name: str - The name of the font that should be used for the Button. Must lead to a valid font when used in pygame.font.Font().
+    font_name: str - The name of the font that should be used for the Button.
     font_size: int - The size (in px) of the text.
     text_colour: (R, G, B) - The colour of the text the user types.
     background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected.

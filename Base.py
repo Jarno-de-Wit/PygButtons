@@ -643,7 +643,13 @@ class Buttons():
         Re-builds a font object based on self.font_name and self.font_size, as well as the current self.scale.
         """
         #pygame.font.Font is used in favor of pygame.font.SysFont, as SysFont's font sizes are inconsistent with the value given for the font.
-        self.__font = pygame.font.Font(self.font_name, round(self.scale * self.font_size))
+        try:
+            self.__font = pygame.font.Font(self.font_name, round(self.scale * self.font_size))
+        except FileNotFoundError:
+            font = pygame.font.match_font(self.font_name)
+            if font is None: #If no matching font was found
+                raise FileNotFoundError(f"No such font: '{self.font_name}'")
+            self.__font = pygame.font.Font(font, round(self.scale * self.font_size))
 
 
     def _Call(self, action):

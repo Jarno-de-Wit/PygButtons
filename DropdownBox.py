@@ -19,7 +19,7 @@ class DropdownBox(Buttons):
                           -: Show n items. If there are less items, show an empty area at the bottom of the list.
     button_spacing: int, (x, y) - The spacing between the buttons inside the Dropdown Box.
     style: "Square", "Round", int - Defines the radius of curvature of the buttons' corners.
-    font_name: str - The name of the font that should be used for the DropdownBox. Must lead to a valid font when used in pygame.font.Font().
+    font_name: str - The name of the font that should be used for the DropdownBox.
     font_size: int - The size (in px) of the text.
     text_colour: (R, G, B) - The colour of the text in the DropdownBox.
     scroll_bar: None, int, Slider - The type of scrollbar to be included. Default styles 1 and 2 are available.
