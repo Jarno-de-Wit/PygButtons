@@ -164,8 +164,8 @@ class DropdownBox(Buttons):
                 self.Claim_input()
 
 
-    def Scale(self, scale, relative_scale = True):
-        super().Scale(scale, self, relative_scale)
+    def Scale(self, scale, relative_scale = True, *, center = (0, 0), scaled_center = None):
+        super().Scale(scale, self, relative_scale, center = center, scaled_center = scaled_center)
 
 
     def Move(self, offset, scale = False):
