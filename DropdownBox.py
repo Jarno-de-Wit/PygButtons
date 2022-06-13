@@ -322,9 +322,9 @@ class DropdownBox(Buttons):
             if self.display_length == 0:
                 self.scroll_bar.Set_slider_primary(self.scroll_bar.height)
             elif self.display_length > 0:
-                self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(len(self.options), self.display_length) / len(self.options)))
+                self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(len(self.options), self.display_length) / max(1, len(self.options))))
             else:
-                self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(1, -self.display_length / len(self.options))))
+                self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(1, -self.display_length / max(1, len(self.options)))))
             self.scroll_bar.slider.limits[3] = self.scroll_bar.bottom #Update the bottom limit of the scroll_bar slider
 
         return True
