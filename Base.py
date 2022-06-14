@@ -53,6 +53,8 @@ class Buttons():
     scroll_factor = 1 #A factor to multiply scrolling with. Should be set based on the target DPI / resolution of the program
     #A framerate variable to help with timing animations
     framerate = 30
+    min_scale = 0.05
+    max_scale = 5
 
     def __init__(self, pos, size, font_name = pygame.font.get_default_font(), font_size = 20, groups = None, root = None, independent = False):
         #Tasks that are the same for all sub-classes
@@ -308,40 +310,39 @@ class Buttons():
 
 
     @classmethod
-    def Scale(cls, scale, group = all, relative_scale = True, *, center = (0, 0), scaled_center = None):
+    def Scale(cls, scale, group = all, relative_scale = True, *, center = (0, 0), px_center = None):
         """
         Scales all buttons in the given group by / to a certain scaling factor.
 
         relative_scale: bool - Determines whether the given scale value is absolute (Button.scale = val), or is a scaling factor relative to their current scale.
         center: tuple - The absolute coordinates around which the scaling should take place.
-        scaled_center: Tuple - The display coordinates around which the scaling should take place. If these are passed in, the 'center' coordinates are ignored.
+        px_center: Tuple - The display coordinates around which the scaling should take place. If these are passed in, the 'center' coordinates are ignored.
         """
         if not isinstance(scale, (float, int)):
             raise TypeError(f"scale must be type 'int' or 'float', not type '{type(scale).__name__}'")
         elif scale == 0:
             raise ValueError(f"Cannot scale buttons to scale '0'")
 
-        if scaled_center:
-            scaled_center = cls.Verify_iterable(scaled_center, 2)
+        if px_center:
+            px_center = cls.Verify_iterable(px_center, 2)
         else:
             center = cls.Verify_iterable(center, 2)
 
-        #Set the scale factor required for setting the Buttons' new position (after scaling around a certain point)
-        scale_factor = 1 / scale
-
         for button in cls.get_group(group):
             if not relative_scale:
-                scale_factor = button.scale / scale
-            if scaled_center:
-                center = tuple(i / button.scale for i in scaled_center)
+                scale_factor = cls.Clamp(scale, button.min_scale, button.max_scale) / button.scale
+            else:
+                scale_factor = cls.Clamp(scale, button.min_scale / button.scale, button.max_scale / button.scale)
+            if px_center: #Transform the pixel coordinates to raw coordinates
+                center = tuple(i / button.scale for i in px_center)
 
             #Apply the translation to make sure the given coordinates stay at the same place
-            button._move(tuple(i * (scale_factor - 1) for i in center))
+            button._move(tuple(i * (1 / scale_factor - 1) for i in center))
 
             if relative_scale:
-                button.scale *= scale
+                button.scale *= scale_factor
             else:
-                button.scale = scale
+                button.scale = scale_factor
 
     @classmethod
     def Move(cls, offset, group = all, scale = False):
