@@ -257,12 +257,10 @@ class Text(Buttons):
         text_lines = self.text.split("\n")
         lines = []
         for line in text_lines:
-            line_string = ""
             words = line.split(" ")
-            for word in words:
-                if line_string == "": #If the line is still empty:
-                    line_string = word #Simply place the word at the start of the string.
-                elif self.font.size(" ".join([line_string, word]))[0] <= max_width: #If the next word still fits on this line:
+            line_string = words[0]
+            for word in words[1:]:
+                if self.font.size(" ".join([line_string, word]))[0] <= max_width: #If the next word still fits on this line:
                     line_string = " ".join([line_string, word]) #Join it together with the existing text
                 else: #If the word is too long to fit on the line:
                     lines.append(line_string)
