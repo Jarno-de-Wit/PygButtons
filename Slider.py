@@ -176,7 +176,7 @@ class Slider(Buttons):
 
             if self.markings:
                 #Set up the information of the marking itself
-                marking_height = self.rotated(self.true_size)[1]
+                marking_height = self.rotated(self.true_size)[1] - 2*(self.scaled(self.border[1]) + self.scaled(self.border[2]) if self.border else 0)
                 marking_width = self.scaled(1)
                 marking_rect = pygame.Rect((0,0), self.rotated((marking_width, marking_height)))
 
