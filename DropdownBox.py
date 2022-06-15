@@ -56,7 +56,7 @@ class DropdownBox(Buttons):
                  button_spacing = (0, 0),
                  style = "Square",
                  font_name = pygame.font.get_default_font(),
-                 font_size = 20,
+                 font_size = 22,
                  text_colour = (0, 0, 0),
                  scroll_bar = None,
                  background = (255, 255, 255),

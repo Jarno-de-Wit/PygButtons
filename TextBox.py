@@ -48,7 +48,7 @@ class TextBox(Buttons):
                  hint = "",
                  style = "Square",
                  font_name = pygame.font.get_default_font(),
-                 font_size = 20,
+                 font_size = 22,
                  text_colour = (0, 0, 0),
                  hint_colour = (128, 128, 128),
                  text_offset = "auto",

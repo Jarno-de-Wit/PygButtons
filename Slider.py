@@ -68,7 +68,7 @@ class Slider(Buttons):
                  slider_border = ((63, 63, 63), 1, 0),
                  slider_accent_background = (191, 191, 191),
                  slider_feature_font = pygame.font.get_default_font(),
-                 slider_feature_size = 20,
+                 slider_feature_size = 22,
                  slider_feature_colour = (63, 63, 63),
                  slider_feature_text = "",
                  slider_size = "Auto",

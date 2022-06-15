@@ -56,7 +56,7 @@ class Buttons():
     min_scale = 0.05
     max_scale = 5
 
-    def __init__(self, pos, size, font_name = pygame.font.get_default_font(), font_size = 20, groups = None, root = None, independent = False):
+    def __init__(self, pos, size, font_name = pygame.font.get_default_font(), font_size = 22, groups = None, root = None, independent = False):
         #Tasks that are the same for all sub-classes
         self.updated = True
         self.children = []

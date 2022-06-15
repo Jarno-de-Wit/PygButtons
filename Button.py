@@ -50,7 +50,7 @@ class Button(Buttons):
                  orientation = 0,
                  style = "Square",
                  font_name = pygame.font.get_default_font(),
-                 font_size = 20,
+                 font_size = 22,
                  text_colour = (0, 0, 0),
                  background = (255, 255, 255),
                  border = ((63, 63, 63), 1, 0),
