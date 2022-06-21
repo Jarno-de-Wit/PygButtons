@@ -339,10 +339,7 @@ class Buttons():
             #Apply the translation to make sure the given coordinates stay at the same place
             button._move(tuple(i * (1 / scale_factor - 1) for i in center))
 
-            if relative_scale:
-                button.scale *= scale_factor
-            else:
-                button.scale = scale_factor
+            button.scale *= scale_factor
 
     @classmethod
     def Move(cls, offset, group = all, scale = False):
