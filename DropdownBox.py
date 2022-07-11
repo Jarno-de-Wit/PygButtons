@@ -38,13 +38,13 @@ class DropdownBox(Buttons):
 
 
     Inputs:
-    *.state: int - Sets the currently selected option.
+    *.state: int - Sets the index of the currently selected option. Set negative to deselect all options
     *.Add_option(*) - Adds an option to the list of possible options. See help(*.Add_option) for more information.
     *.Del_option(*) - Removes an option from the list of possible options. See help(*.Del_option) for more information.
 
     Outputs:
     *.value: * - The value of the currently selected item. Type can be wathever was given as the value.
-    *.state: int - The index of the currently selected item.
+    *.state: int - The index of the currently selected option. Is -1 if no option is selected.
     *.new_state: bool - Whether the DropdownBox has been set to a new state since the last time this variable was checked. Automatically resets once it is querried.
 
     *.is_selected: bool - Whether this DropdownBox object is selected at this point in time. I.E. Whether DropdownBox is expanded.
@@ -335,11 +335,13 @@ class DropdownBox(Buttons):
         if self._state >= 0:
             return self.options[self._state]
         else:
-            return -1
+            return None
     @value.setter
     def value(self, value):
         if value in self.options:
             self.state = self.options.index(value)
+        elif value is None:
+            self.state = -1
         else:
             raise ValueError("Value not in options list")
 
@@ -350,6 +352,9 @@ class DropdownBox(Buttons):
         return self.__state
     @_state.setter
     def _state(self, value):
+        #Verify that the index is not too big to prevent getting into an unrecoverable state if the state is out of bounds.
+        if value >= len(self.options):
+            raise IndexError("Index out of range")
         #Clear the currently selected button (if any)
         if self.__state >= 0:
             self.button_list[self.__state].value = False
