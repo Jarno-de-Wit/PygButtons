@@ -254,7 +254,8 @@ class Text(Buttons):
         Called automatically in *.Draw, after *.text is set / changed.
         """
         max_width = self.true_width - 2 * self.scaled(self.text_offset[0]) - (self.scroll_bar.true_width + self.scaled(self.text_offset[0]) if self.scroll_bar else 0)
-        text_lines = self.text.split("\n")
+        #Split the text into lines, ignoring any trailing newlines.
+        text_lines = self.text.strip("\n").split("\n")
         lines = []
         for line in text_lines:
             words = line.split(" ")
