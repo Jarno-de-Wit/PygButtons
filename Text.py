@@ -255,7 +255,7 @@ class Text(Buttons):
         """
         max_width = self.true_width - 2 * self.scaled(self.text_offset[0]) - (self.scroll_bar.true_width + self.scaled(self.text_offset[0]) if self.scroll_bar else 0)
         #Split the text into lines, ignoring any trailing newlines.
-        text_lines = self.text.strip("\n").split("\n")
+        text_lines = self.text.rstrip("\n").split("\n")
         lines = []
         for line in text_lines:
             words = line.split(" ")
