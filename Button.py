@@ -80,7 +80,7 @@ class Button(Buttons):
         self.mode = mode.lower()
         self.clicked = False #Make sure the button does not register any ghost inputs at the start
         self.text = text
-        self.text_colour = [self.Clamp(i, 0, 255) for i in self.Verify_iterable(text_colour, 3, int)]
+        self.text_colour = self.Verify_colour(text_colour)
         self.bg = self.Verify_background(background)
         if accent_background:
             self.accent_bg = self.Verify_background(accent_background)
