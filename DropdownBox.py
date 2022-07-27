@@ -52,12 +52,14 @@ class DropdownBox(Buttons):
     actions = ["LMB_down", "LMB_up", "Set_cursor_pos", "Scroll"]
     def __init__(self, pos, size,
                  options = [],
+                 hint = "",
                  display_length = 0,
                  button_spacing = (0, 0),
                  style = "Square",
                  font_name = pygame.font.get_default_font(),
                  font_size = 22,
                  text_colour = (0, 0, 0),
+                 hint_colour = (128, 128, 128),
                  scroll_bar = None,
                  background = (255, 255, 255),
                  border = ((63, 63, 63), 1, 0),
@@ -72,6 +74,7 @@ class DropdownBox(Buttons):
         Create a DropdownBox Button object. See help(type(self)) for more detailed information.
         """
         super().__init__(pos, size, font_name, font_size, group, root, independent)
+        self.hint = hint
         #Storing information required for later child buttons
         self.bg = self.Verify_background(background)
         self.accent_bg = self.Verify_background(accent_background)
@@ -109,7 +112,8 @@ class DropdownBox(Buttons):
         else:
             self.scroll_bar = None
 
-        self.text_colour = text_colour
+        self.text_colour = self.Verify_colour(text_colour)
+        self.hint_colour = self.Verify_colour(hint_colour)
 
         self.functions = functions
         #Add in all the options
@@ -363,9 +367,11 @@ class DropdownBox(Buttons):
             self.__state = value
             self.button_list[value].value = True
             self.main_button.text = self.button_list[value].text
+            self.main_button.text_colour = self.text_colour
         else:
             self.__state = -1
-            self.main_button.text = ""
+            self.main_button.text = self.hint
+            self.main_button.text_colour = self.hint_colour
         self.new_state = True
         self.updated = True
         self.moved = True
