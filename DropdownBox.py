@@ -262,6 +262,8 @@ class DropdownBox(Buttons):
             self.state = index #Set the new state, including running ._Call
         elif index <= self._state: #If the new item is before the current one, shift the index by 1 as well, and don't run ._Call
             self._state = state + 1
+        else: #Otherwise, set the state back to what it was already
+            self._state = state
 
         #Update the scroll_bar size if present
         if self.scroll_bar:
