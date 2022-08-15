@@ -29,6 +29,7 @@ def Main():
     button_count = Button((50, 25 ), (200, 50), text = "Count", mode = "Count")
     button_toggle = Button((50, 100), (200, 50), text = "Toggle", mode = "Toggle")
     button_hold = Button((50, 175), (200, 50), text = "Hold", mode = "Hold")
+    Button_func = Button((50, 250), (200, 50), text = "Function (print)", mode = "None", functions = {"Click": (print, "Clicked")})
 
     button_tb = TextBox((350, 25),(200, 50), hint = "Type here")
     button_text = Text((300, 125), (300, 100), text = "This is a Text object. You can scroll through the text if you want, although this text isn't really that interesting.", border = ((31, 31, 31), 1, 0), scroll_bar = 2)
