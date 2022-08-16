@@ -22,6 +22,7 @@ class Button(Buttons):
     font_name: str - The name of the font that should be used for the Button.
     font_size: int - The size (in px) of the text.
     text_colour: (R, G, B) - The colour of the text the user types.
+    text_align: The alignment of the text on the Button.
     background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected.
     border: ((R, G, B), width, offset), None - The border that appears around the TextBox.
     accent background: pygame.Surface, (R, G, B), None, function - The background of the Button if *.value. If set to None, will be the same as normal background.
@@ -52,6 +53,7 @@ class Button(Buttons):
                  font_name = pygame.font.get_default_font(),
                  font_size = 22,
                  text_colour = (0, 0, 0),
+                 text_align = "Center",
                  background = (255, 255, 255),
                  border = ((63, 63, 63), 1, 0),
                  accent_background = (220, 220, 220),
@@ -81,6 +83,7 @@ class Button(Buttons):
         self.clicked = False #Make sure the button does not register any ghost inputs at the start
         self.text = text
         self.text_colour = self.Verify_colour(text_colour)
+        self.text_align = text_align
         self.bg = self.Verify_background(background)
         if accent_background:
             self.accent_bg = self.Verify_background(accent_background)
@@ -187,8 +190,9 @@ class Button(Buttons):
                 if self.orientation:
                     text_surface = pygame.transform.rotate(text_surface, -90 * self.orientation)
                 text_rect = text_surface.get_rect()
-                #For moving text, edit the line below, to make the centers no longer align
-                text_rect.center = limiter_rect.center
+                #Align the text properly
+                self.Align(text_rect, limiter_rect, self.text_align)
+                #Blit the text to the limiter surface, and then onto the screen
                 text_limiter.blit(text_surface, text_rect)
                 limiter_rect.center = self.middle
                 self.surface.blit(text_limiter, limiter_rect)
@@ -215,6 +219,14 @@ class Button(Buttons):
     @text.setter
     def text(self, value):
         self.__text = str(value)
+        self.updated = True
+
+    @property
+    def text_align(self):
+        return self.__text_align
+    @text_align.setter
+    def text_align(self, value):
+        self.__text_align = value
         self.updated = True
 
     @property

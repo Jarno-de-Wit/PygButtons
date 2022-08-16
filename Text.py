@@ -17,6 +17,7 @@ class Text(Buttons):
     font_name: str - The name of the font that should be used for the Text.
     font_size: int - The size (in px) of the text.
     text_colour: (R, G, B) - The colour of the text in the Text object.
+    text_align: The alignment of the text on the Button surface.
     text_offset: "auto", int, (x, y) - The offset the text should have from the sides of the Text object. Prevents the text from overlapping with borders, and touching the edges.
     scroll_bar: None, int, Slider - The type of scrollbar to be included. Default styles 1 and 2 are available.
     background: pygame.Surface, (R, G, B), None, function - The background of the button.
@@ -45,6 +46,7 @@ class Text(Buttons):
                  font_name = pygame.font.get_default_font(),
                  font_size = 22,
                  text_colour = (0, 0, 0),
+                 text_align = "topleft",
                  text_offset = "auto",
                  scroll_bar = None,
                  background = None,
@@ -60,6 +62,7 @@ class Text(Buttons):
         super().__init__(pos, size, font_name, font_size, group, root, independent)
         self.style = style
         self.text_colour = self.Verify_colour(text_colour)
+        self.text_align = text_align
 
         self.bg = self.Verify_background(background)
         self.border = self.Verify_border(border)
@@ -137,17 +140,29 @@ class Text(Buttons):
             if self.border:
                 self.Draw_border(self.bg_surface, *self.border)
 
-            #Build the surface containing ALL lines of text
             font_height = self.font.get_height()
-            self.text_surface =  pygame.Surface((self.true_width - 2 * self.scaled(self.text_offset[0]) - (self.scroll_bar.true_width + self.scaled(self.text_offset[0]) if self.scroll_bar else 0), font_height * len(self.lines)), pygame.SRCALPHA)
+            if self.px_height >= len(self.lines) * font_height:
+                #If the text fully fits within the available space, calculate the vertical offset to get the right alignment
+                vert_offset = self.AlignY(len(self.lines) * font_height, self.px_height, self.text_align).top
+            else:
+                #If the text requires scrolling, vertical alignment doesn't matter anymore (all vertical alignment is taken over by the scrolled value)
+                vert_offset = 0
+
+            #Build the surface containing ALL lines of text
+            self.text_surface =  pygame.Surface((self.px_width, font_height * len(self.lines) + vert_offset), pygame.SRCALPHA)
+
             for line_nr, line in enumerate(self.lines):
-                self.text_surface.blit(self.font.render(line, True, self.text_colour), (0, line_nr * font_height))
+                line_surf = self.font.render(line, True, self.text_colour)
+                line_rect = line_surf.get_rect()
+                line_rect.top = line_nr * font_height + vert_offset
+                line_rect = self.AlignX(line_rect, self.px_width, self.text_align)
+                self.text_surface.blit(line_surf, line_rect)
 
             self.updated = False
 
         if self.moved:
             #Blit the fully rendered text surface onto a limiter surface.
-            text_limiter = pygame.Surface((self.true_width - 2 * self.scaled(self.text_offset[0]) - (self.scroll_bar.true_width + self.scaled(self.text_offset[0]) if self.scroll_bar else 0), self.true_height - 2 * self.scaled(self.text_offset[1])), pygame.SRCALPHA)
+            text_limiter = pygame.Surface((self.px_width, self.true_height - 2 * self.scaled(self.text_offset[1])), pygame.SRCALPHA)
             text_limiter.blit(self.text_surface, (0, -self.scrolled_px))
 
             #Blit the text surface onto the actual background
@@ -253,7 +268,7 @@ class Text(Buttons):
         (Re-)builds the '*.lines' tuple based on the current value of self.text, such that the text will automatically wrap around to the next line if it won't fit on the current line anymore.
         Called automatically in *.Draw, after *.text is set / changed.
         """
-        max_width = self.true_width - 2 * self.scaled(self.text_offset[0]) - (self.scroll_bar.true_width + self.scaled(self.text_offset[0]) if self.scroll_bar else 0)
+        max_width = self.px_width
         #Split the text into lines, ignoring any trailing newlines.
         text_lines = self.text.rstrip("\n").split("\n")
         lines = []
@@ -275,6 +290,19 @@ class Text(Buttons):
 
         self.scrolled += 0 #Update the 'scrolled' value, to take into account that after rebuilding, the length of 'lines' might be different
 
+    @property
+    def px_width(self):
+        """
+        The maximum width (in px) the text may have. In other words, the horizontal space available for text.
+        """
+        return self.true_width - 2 * self.scaled(self.text_offset[0]) - (self.scroll_bar.true_width + self.scaled(self.text_offset[0]) if self.scroll_bar else 0)
+
+    @property
+    def px_height(self):
+        """
+        The maximum height (in px) the text may have. In other words, the horizontal space available for text.
+        """
+        return self.true_height + 2 * self.scaled(self.text_offset[1])
 
 def Make_scroll_bar(self, scroll_bar):
     """

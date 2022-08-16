@@ -15,6 +15,9 @@ class DropdownBox(Buttons):
     size: (width, height) - The size before scaling.
     options: list, tuple - A list containing the values of all options to be added to the DropdownBox.
     hint: str - The text that is displayed in the main box when no option is selected.
+    option_align: The alignment of the text on the dropped down 'option' buttons.
+    value_align: The alignment of the current value on the main Button.
+    hint_align: The alignment of the hint on the main Button.
     display_length: int - 0: unlimited (show all items regardless of how many there are).
                           +: Show up to n items, but if there are less, limit the length to the amount of items.
                           -: Show n items. If there are less items, show an empty area at the bottom of the list.
@@ -54,6 +57,9 @@ class DropdownBox(Buttons):
     def __init__(self, pos, size,
                  options = [],
                  hint = "",
+                 option_align = "center",
+                 value_align = "left",
+                 hint_align = "left", #Align left for consistency with text boxes
                  display_length = 0,
                  button_spacing = (0, 0),
                  style = "Square",
@@ -75,7 +81,10 @@ class DropdownBox(Buttons):
         Create a DropdownBox Button object. See help(type(self)) for more detailed information.
         """
         super().__init__(pos, size, font_name, font_size, group, root, independent)
+        self.option_align = option_align
         self.hint = hint
+        self.hint_align = hint_align
+        self.value_align = value_align
         #Storing information required for later child buttons
         self.bg = self.Verify_background(background)
         self.accent_bg = self.Verify_background(accent_background)
@@ -240,6 +249,7 @@ class DropdownBox(Buttons):
         new_button = Button((self.left, self.bottom + self.spacing[1] + index * (self.height + self.spacing[1])),
                             (self.width - (self.scroll_bar.width + self.spacing[0] if self.scroll_bar else 0), self.height),
                             text = str(value),
+                            text_align = self.option_align,
                             style = self.style,
                             background = self.bg,
                             accent_background = self.accent_bg,
@@ -371,10 +381,12 @@ class DropdownBox(Buttons):
             self.button_list[value].value = True
             self.main_button.text = self.button_list[value].text
             self.main_button.text_colour = self.text_colour
+            self.main_button.text_align = self.value_align
         else:
             self.__state = -1
             self.main_button.text = self.hint
             self.main_button.text_colour = self.hint_colour
+            self.main_button.text_align = self.hint_align
         self.new_state = True
         self.updated = True
         self.moved = True
@@ -396,7 +408,6 @@ class DropdownBox(Buttons):
     @new_state.setter
     def new_state(self, value):
         self.__new_state = True
-
 
 
     @property

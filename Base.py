@@ -380,6 +380,88 @@ class Buttons():
                 cls.input_lock.Draw(screen)
 
 
+    @classmethod
+    def Align(cls, rect, limit_size, pos):
+        """
+        Creates an aligned Rect, with the given size when placed onto a surface with size 'limit_size'.
+        Functionally just a wrapper around AlignX and AlignY.
+
+        rect: A pygame.Rect object or size tuple to be aligned.
+        limit_size: A pygame.Rect object or size tuple to which the rect should be aligned.
+        pos: The (text) containing the information on how the rect should be aligned (e.g. "top", "midleft", etc.). Defaults to centered if no alignment info is given for an axis, or the given info is invalid.
+        """
+        if isinstance(limit_size, pygame.Rect):
+            #If the provided 'limit_size' is a Rect, extract its size
+            limit_size = limit_size.size
+        pos = pos.lower()
+
+        rect = cls.AlignX(rect, limit_size[0], pos)
+        rect = cls.AlignY(rect, limit_size[1], pos)
+
+        return rect
+
+    @staticmethod
+    def AlignX(rect, max, pos):
+        """
+        Creates a rectangle that is correctly aligned horizontally.
+
+        rect: A pygame.Rect object or size tuple to be aligned.
+        limit_size: A pygame.Rect object or size tuple to which the rect should be aligned.
+        pos: The (text) containing the information on how the rect should be aligned (e.g. "top", "midleft", etc.). Defaults to centered if no alignment info is given for an axis, or the given info is invalid.
+        """
+        if isinstance(rect, pygame.Rect):
+            #Make sure the provided Rect is aligned correctly at the start
+            rect.left = 0
+        elif isinstance(rect, int):
+            #If only an int (width) is given, create a zero height corresponding pygame.Rect
+            rect = pygame.Rect((0, 0), (rect, 0))
+        else:
+            #If the provided 'rect' argument is not a rect, but just a tuple containing a size, create a new Rect
+            rect = pygame.Rect((0, 0), rect)
+        if isinstance(max, pygame.Rect):
+            max = max.width
+        pos = pos.lower()
+
+        if "left" in pos:
+            pass
+        elif "right" in pos:
+            rect.right = max
+        else:
+            rect.centerx = math.floor(max / 2)
+        return rect
+
+    @staticmethod
+    def AlignY(rect, max, pos):
+        """
+        Creates a rectangle that is correctly aligned vertically.
+
+        rect: A pygame.Rect object or size tuple to be aligned.
+        limit_size: A pygame.Rect object or size tuple to which the rect should be aligned.
+        pos: The (text) containing the information on how the rect should be aligned (e.g. "top", "midleft", etc.). Defaults to centered if no alignment info is given for an axis, or the given info is invalid.
+        """
+        if isinstance(rect, pygame.Rect):
+            #Make sure the provided Rect is aligned correctly at the start
+            rect.top = 0
+        elif isinstance(rect, int):
+            #If only an int (height) is given, create a zero width corresponding pygame.Rect
+            rect = pygame.Rect((0, 0), (0, rect))
+        else:
+            #If the provided 'rect' argument is not a rect, but just a tuple containing a size, create a new Rect
+            rect = pygame.Rect((0, 0), rect)
+        if isinstance(max, pygame.Rect):
+            max = max.height
+        pos = pos.lower()
+
+        if "top" in pos:
+            pass
+        elif "bottom" in pos:
+            rect.right = max
+        else:
+            rect.centery = math.floor(max / 2)
+
+        return rect
+
+
     def contains(self, position):
         """
         Tests whether a position is within the current (main) button.

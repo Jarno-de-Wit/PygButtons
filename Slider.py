@@ -28,6 +28,7 @@ class Slider(Buttons):
     slider_feature_font: str - The name of the font that should be used for the slider feature.
     slider_feature_size: int - The size (in px) of the sliders' feature text.
     slider_feature_colour: (R, G, B) - The colour of the feature / text on the slider.
+    slider_feature_align: The alignment of the feature text on the slider Button.
     slider_feature_text: str - The feature / text that will be rendered to the slider.
     slider_size: "auto", int, (width, height) - The size of the slider. If set to "auto", will automatically fit the slider to the direction orthogonal to the orientation.
     functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments. If the Button itself is to be passed in as an argument, that argument can be passed in as '*self*'. This argument will automatically replaced when the function is actually called.
@@ -70,6 +71,7 @@ class Slider(Buttons):
                  slider_feature_font = pygame.font.get_default_font(),
                  slider_feature_size = 22,
                  slider_feature_colour = (63, 63, 63),
+                 slider_feature_align = "center",
                  slider_feature_text = "",
                  slider_size = "Auto",
                  #Other (miscelaneous) settings
@@ -104,7 +106,7 @@ class Slider(Buttons):
 
         #Create the sliding object (from now on referred to as "slider" (lower case))
         self.tmp_slider_size = slider_size
-        self.slider = Make_slider(self, style, slider_size, slider_background, slider_accent_background, slider_border, markings, edge_markings, snap_radius, slider_feature_text, slider_feature_colour, slider_feature_font, slider_feature_size, self.orientation)
+        self.slider = Make_slider(self, style, slider_size, slider_background, slider_accent_background, slider_border, markings, edge_markings, snap_radius, slider_feature_text, slider_feature_colour, slider_feature_align, slider_feature_font, slider_feature_size, self.orientation)
         self._value = start_value
         del self.tmp_slider_size
         self.children.append(self.slider)
@@ -326,7 +328,7 @@ class Slider(Buttons):
         self.__moved = value
 
 
-def Make_slider(self, style, size, background, accent_background, border, markings, edge_markings, snap_radius, feature_text, feature_colour, feature_font, feature_size, orientation):
+def Make_slider(self, style, size, background, accent_background, border, markings, edge_markings, snap_radius, feature_text, feature_colour, feature_align, feature_font, feature_size, orientation):
     """
     Make a slider Button.
     For internal use only. This function is therefore also not imported by __init__.py
@@ -349,6 +351,7 @@ def Make_slider(self, style, size, background, accent_background, border, markin
                 background = background,
                 text = feature_text,
                 text_colour = feature_colour,
+                text_align = feature_align,
                 font_name = feature_font,
                 font_size = feature_size,
                 orientation = orientation,

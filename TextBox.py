@@ -18,6 +18,7 @@ class TextBox(Buttons):
     font_size: int - The size (in px) of the text.
     text_colour: (R, G, B) - The colour of the text the user types.
     hint_colour: (R, G, B) - The colour of the hint.
+    text_align: The alignment of the text on the Button. Vertical alignment is always active. Horizontal alignment only if the width of the text is less than the available space.
     text_offset: "auto", int, (x, y) - The offset the text should have from the sides of the TextBox. Prevents the text from overlapping with borders, and touching the edges.
     background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected.
     border: ((R, G, B), width, offset), None - The border that appears around the TextBox.
@@ -51,6 +52,7 @@ class TextBox(Buttons):
                  font_size = 22,
                  text_colour = (0, 0, 0),
                  hint_colour = (128, 128, 128),
+                 text_align = "left",
                  text_offset = "auto",
                  background = (255, 255, 255),
                  border = ((63, 63, 63), 1, 0),
@@ -72,6 +74,7 @@ class TextBox(Buttons):
         self.style = style
         self.text_colour = self.Verify_colour(text_colour)
         self.hint_colour = self.Verify_colour(hint_colour)
+        self.text_align = text_align
         self.bg = self.Verify_background(background)
         if accent_background:
             self.accent_bg = self.Verify_background(accent_background)
@@ -193,6 +196,8 @@ class TextBox(Buttons):
             #Draw a accent border, if it is enabled:
             if self.accent_border and self.is_selected:
                 self.Draw_border(self.surface, *self.accent_border)
+            #Copy the surface to allow the cursor to be drawn
+            self.cursor_surface = self.surface.copy()
 
             #Add the text to the surface
             text_limiter = pygame.Surface(self.offset(self.true_size, self.scaled(self.text_offset), (-2, -2)), pygame.SRCALPHA)
@@ -203,19 +208,27 @@ class TextBox(Buttons):
                 text_surface = self.font.render(self.hint, True, self.hint_colour)
             text_rect = text_surface.get_rect()
             #Align the text rect
-            text_rect.centery = limiter_rect.centery
-            text_rect.left = - self.text_scroll
+            text_rect = self.AlignY(text_rect, limiter_rect, self.text_align)
+            if text_rect.width <= limiter_rect.width:
+                #If the text is smaller than the limiter, perform alignment in the X direction
+                self.AlignX(text_rect, limiter_rect, self.text_align)
+            else:
+                #If the text is wider than the limiter, all alignment is taken care of inside text_scroll
+                text_rect.left = - self.text_scroll
             text_limiter.blit(text_surface, text_rect)
             #Blit the limiter onto the button
             limiter_rect.center = self.middle #middle is scaled(width / 2, height / 2)
             self.surface.blit(text_limiter, limiter_rect)
 
             #Make the cursor surface
-            self.cursor_surface = self.surface.copy()
-            cursor_rect = pygame.Rect((10, 0), (max(1, self.scaled(1)), self.font.get_height()))
-            cursor_rect.centery = self.middle[1]
-            cursor_rect.left = self.font.size(self.text[:self.cursor])[0] - self.text_scroll + self.scaled(self.text_offset[0])
-            pygame.draw.rect(self.cursor_surface, self.text_colour,  cursor_rect)
+            cursor_rect = pygame.Rect((0, 0), (max(1, self.scaled(1)), self.font.get_height()))
+            #Align cursor vertically
+            cursor_rect.centery = text_rect.centery
+            #Align cursor horizontally. (if-else statement is required to prevent the hint from changing the Cursor location.)
+            cursor_rect.left = self.font.size(self.text[:self.cursor])[0] + (text_rect.left if self.text else self.AlignX(cursor_rect.width, limiter_rect, self.text_align).left)
+            #Draw the cursor to the text limiter
+            pygame.draw.rect(text_limiter, self.text_colour,  cursor_rect)
+            self.cursor_surface.blit(text_limiter, limiter_rect)
 
             #Clear self.updated again, as the surface has been remade.
             self.updated = False
