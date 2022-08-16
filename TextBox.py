@@ -196,13 +196,11 @@ class TextBox(Buttons):
 
             #Add the text to the surface
             text_limiter = pygame.Surface(self.offset(self.true_size, self.scaled(self.text_offset), (-2, -2)), pygame.SRCALPHA)
-            self.s = text_limiter
             limiter_rect = text_limiter.get_rect()
             if self.text:
                 text_surface = self.font.render(self.text, True, self.text_colour)
             else:
                 text_surface = self.font.render(self.hint, True, self.hint_colour)
-            self.t = text_surface
             text_rect = text_surface.get_rect()
             #Align the text rect
             text_rect.centery = limiter_rect.centery
