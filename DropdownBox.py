@@ -14,6 +14,7 @@ class DropdownBox(Buttons):
     pos: (left, top) - The topleft position before scaling.
     size: (width, height) - The size before scaling.
     options: list, tuple - A list containing the values of all options to be added to the DropdownBox.
+    hint: str - The text that is displayed in the main box when no option is selected.
     display_length: int - 0: unlimited (show all items regardless of how many there are).
                           +: Show up to n items, but if there are less, limit the length to the amount of items.
                           -: Show n items. If there are less items, show an empty area at the bottom of the list.
