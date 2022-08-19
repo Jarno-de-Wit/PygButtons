@@ -107,7 +107,7 @@ class Slider(Buttons):
         #Create the sliding object (from now on referred to as "slider" (lower case))
         self.tmp_slider_size = slider_size
         self.slider = Make_slider(self, style, slider_size, slider_background, slider_accent_background, slider_border, markings, edge_markings, snap_radius, slider_feature_text, slider_feature_colour, slider_feature_align, slider_feature_font, slider_feature_size, self.orientation)
-        self._value = start_value
+        self._value = self.start_value = start_value
         del self.tmp_slider_size
         self.children.append(self.slider)
 
@@ -156,6 +156,13 @@ class Slider(Buttons):
 
     def Move(self, offset, scale = False):
         super().Move(offset, self, scale)
+
+
+    def Clear(self):
+        #Reset the slider position to its inital value
+        self._value = self.start_value
+        self.is_selected = False
+        #Lock is automatically released in property setter
 
 
     def Draw(self, screen, pos = None):

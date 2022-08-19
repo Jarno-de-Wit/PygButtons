@@ -178,6 +178,12 @@ class TextBox(Buttons):
         super().Move(offset, self, scale)
 
 
+    def Clear(self):
+        self.value = ""
+        self.is_selected = False
+        #Lock is automatically released in property setter
+
+
     def Draw(self, screen, pos = None):
         """
         Draw the button to the screen.

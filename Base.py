@@ -23,6 +23,7 @@ class Buttons():
     Buttons.Draw(screen, group) - Draw all Buttons in the given group(s) to the given screen / pygame.Surface
     Buttons.Scale(scale, group) - Scales all Buttons in the given group to / by the given factor.
     Buttons.Move(offset, group) - Moves all Buttons in the given group by the given offset.
+    Buttons.Clear(group) - Clears all user inputs from Buttons. Note: Does NOT remove the text from Text objects.
 
     Other Actions (automatically called by Buttons.Event() / Buttons.Update() when required):
     Buttons.LMB_down(pos, group) - Perform a LMB_down (normal mouse click) at a certain position.
@@ -362,6 +363,16 @@ class Buttons():
                 b_offset = button.scaled(offset, False)
             button._move(b_offset)
 
+
+    @classmethod
+    def Clear(cls, group = all):
+        """
+        Clears all user inputs from the buttons in the given group.
+
+        group: * - The group of Buttons which should be cleared.
+        """
+        for button in cls.get_group(group):
+            button.Clear()
 
     @classmethod
     def Draw(cls, screen, group = all):

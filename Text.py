@@ -124,6 +124,12 @@ class Text(Buttons):
         super().Move(offset, self, scale)
 
 
+    def Clear(self):
+        self.scrolled = 0
+        self.Release_lock()
+        #Does not do anything to the contained text, since that is not created directly through user input.
+
+
     def Draw(self, screen, pos = None):
         """
         Draw the button to the screen.

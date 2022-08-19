@@ -166,6 +166,11 @@ class Button(Buttons):
         super().Move(offset, self, scale)
 
 
+    def Clear(self):
+        self.value = 0 if self.mode.lower() == "count" else False
+        self.Release_lock()
+
+
     def Draw(self, screen, pos = None):
         """
         Draw the button to the screen.
