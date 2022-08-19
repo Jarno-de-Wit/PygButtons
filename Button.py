@@ -110,9 +110,9 @@ class Button(Buttons):
             elif self.mode == "hold":
                 self.Set_lock()
                 self.value = True
+                if any(self.dragable):
+                    self.drag_pos = self.relative(pos)
             self.Claim_input()
-            if any(self.dragable):
-                self.drag_pos = self.relative(pos)
 
             if self.mode == "toggle" and not self.value: #If the button is toggled OFF, _Call release. For all other cases, _Call click
                 self.root._Call("Release")
