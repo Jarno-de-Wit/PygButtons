@@ -26,7 +26,7 @@ class Button(Buttons):
     background: pygame.Surface, (R, G, B), None, function - The background of the button if it is not selected.
     border: ((R, G, B), width, offset), None - The border that appears around the TextBox.
     accent background: pygame.Surface, (R, G, B), None, function - The background of the Button if *.value. If set to None, will be the same as normal background.
-    dragable: (horizotal, vertical) - A tuple of two booleans defining whether the Button is allowed to be moved in either the horizontal and / or vertical direction repectively.
+    dragable: (horizotal, vertical) - A tuple of two booleans defining whether the Button is allowed to be moved in either the horizontal and / or vertical direction repectively. Requires mode == "Hold".
     limits: (left, right, top, bottom) - The coordinate limits between which the Button is to be draggable.
     snap: ((x snap coords, ___), (y snapc coords, ___), snap_range) - If the button is dragable / movable, the positions to which the Button should snap, as well as the range (in px) within which the Button should snap to these locations.
     functions: dict - Contains functions that should be called when a specific event occurs. The values should either be {"Click": func,} to call a function without arguments, or {"Click": (func, arg1, arg2, ...)} to call a function with arguments. If the Button itself is to be passed in as an argument, that argument can be passed in as '*self*'. This argument will automatically replaced when the function is actually called.
