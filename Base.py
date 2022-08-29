@@ -79,7 +79,7 @@ class Buttons():
     def __str__(self):
         return f"{type(self).__name__} object"
     def __repr__(self):
-        return f"{self.__str__()} at {self.topleft}"
+        return f"<{self.__str__()} at {self.topleft}>"
 
 
 
