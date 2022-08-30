@@ -3,7 +3,6 @@ from Base import Buttons
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
 import pygame
-import math
 
 
 class TextBox(Buttons):
