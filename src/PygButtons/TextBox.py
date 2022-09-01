@@ -214,9 +214,10 @@ class TextBox(Buttons):
             text_rect = text_surface.get_rect()
             #Align the text rect
             text_rect = self.AlignY(text_rect, limiter_rect, self.text_align)
-            if text_rect.width <= limiter_rect.width:
+            if text_rect.width < limiter_rect.width:
                 #If the text is smaller than the limiter, perform alignment in the X direction
-                self.AlignX(text_rect, limiter_rect, self.text_align)
+                #Available width -= 1 to account for the cursor potentially being on the right side of the text
+                self.AlignX(text_rect, limiter_rect.width - 1, self.text_align)
             else:
                 #If the text is wider than the limiter, all alignment is taken care of inside text_scroll
                 text_rect.left = - self.text_scroll
