@@ -1,5 +1,5 @@
 # PygButtons
-A module made to help in creating a UI by simplifying the creation and handling of basic UI objects (such as Buttons).
+A module made to help create a UI in pygame by simplifying the creation and handling of basic UI objects (such as Buttons).
 
 ## Contents
 - [Installation](#Installation)
