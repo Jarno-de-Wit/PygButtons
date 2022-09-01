@@ -81,10 +81,10 @@ class DropdownBox(Buttons):
         Create a DropdownBox Button object. See help(type(self)) for more detailed information.
         """
         super().__init__(pos, size, font_name, font_size, group, root, independent)
-        self.option_align = option_align
+        self.__option_align = option_align
         self.hint = hint
-        self.hint_align = hint_align
-        self.value_align = value_align
+        self.__hint_align = hint_align
+        self.__value_align = value_align
         #Storing information required for later child buttons
         self.bg = self.Verify_background(background)
         self.accent_bg = self.Verify_background(accent_background)
@@ -477,6 +477,37 @@ class DropdownBox(Buttons):
             self.Release_lock(False)
             self.root._Call("Deselect")
         self.updated = True
+
+
+    @property
+    def option_align(self):
+        return self.__option_align
+    @option_align.setter
+    def option_align(self, value):
+        self.__option_align = value
+        for button in self.button_list:
+            button.text_align = value
+        self.updated = True
+
+    @property
+    def value_align(self):
+        return self.__value_align
+    @value_align.setter
+    def value_align(self, value):
+        self.__value_align = value
+        if self.__state >= 0:
+            self.main_button.text_align = value
+            self.updated = True
+
+    @property
+    def hint_align(self):
+        return self.__hint_align
+    @hint_align.setter
+    def hint_align(self, value):
+        self.__hint_align = value
+        if self.__state <= -1:
+            self.main_button.text_align = value
+            self.updated = True
 
 
     @property
