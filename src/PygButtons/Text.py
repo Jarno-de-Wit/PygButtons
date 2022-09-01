@@ -231,6 +231,15 @@ class Text(Buttons):
 
 
     @property
+    def text_align(self):
+        return self.__text_align
+    @text_align.setter
+    def text_align(self, value):
+        self.__text_align = value
+        self.updated = True
+
+
+    @property
     def value(self):
         return self.text
 
