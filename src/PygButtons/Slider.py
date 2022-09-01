@@ -333,6 +333,13 @@ class Slider(Buttons):
     def moved(self, value):
         self.__moved = value
 
+    @property
+    def slider_feature_align(self):
+        return self.slider.text_align
+    @slider_feature_align.setter
+    def slider_feature_align(self, value):
+        self.slider.text_align = value
+
 
 def Make_slider(self, style, size, background, accent_background, border, markings, edge_markings, snap_radius, feature_text, feature_colour, feature_align, feature_font, feature_size, orientation):
     """
