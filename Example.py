@@ -1,9 +1,5 @@
-#Import all Buttons from the module. In this case, the file it is imported from
-# is __init__ as, this example program is in the same folder as the Buttons
-# themselves. If the program importing the Buttons is in a higher level
-# directory, use:
-# from path.to.Buttons import *
-from __init__ import *
+#Import all Buttons from pygbuttons
+from pygbuttons import *
 
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
