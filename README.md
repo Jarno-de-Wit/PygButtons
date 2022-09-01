@@ -8,7 +8,7 @@ A module made to help in creating a UI by simplifying the creation and handling 
 - [Support](#Support)
 
 ## Installation
-The only way to install this project currently is to download the source from GitHub. From there, move the folder to a directory which is easily accessible, and import the module from that path.
+To install, run: `pip install pygbuttons`
 
 ## Dependencies
 - Python => 3.6
