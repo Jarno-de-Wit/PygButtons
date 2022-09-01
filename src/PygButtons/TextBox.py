@@ -112,7 +112,11 @@ class TextBox(Buttons):
                 if self.text:
                     #Iterate over all letters, to find which letter was closest to
                     #the position at which the user clicked
-                    pixel_offset = - self.text_scroll + self.scaled(max(self.border[1] + self.border[2] + round(self.font_size / 4), self.accent_border[1] + self.accent_border[2] + round(self.font_size / 4)), True)
+                    text_width = self.font.size(self.text)[0]
+                    if text_width < self.true_width - 2 * self.scaled(self.text_offset[0]):
+                        pixel_offset = self.AlignX(text_width, self.true_width - 2 * self.scaled(self.text_offset[0]) - 1, self.text_align).left + self.scaled(self.text_offset[0])
+                    else:
+                        pixel_offset = - self.text_scroll + self.scaled(self.text_offset[0])
                     for letter_nr, letter in enumerate(self.text):
                         pixel_length = self.font.size(self.text[:letter_nr + 1])[0]
                         if (pixel_length + pixel_offset) >= pos[0]:
