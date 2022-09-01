@@ -1,5 +1,5 @@
-from Base import Buttons
-from Button import Button
+from .Base import Buttons
+from .Button import Button
 
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
