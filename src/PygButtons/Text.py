@@ -317,7 +317,7 @@ class Text(Buttons):
         """
         The maximum height (in px) the text may have. In other words, the horizontal space available for text.
         """
-        return self.true_height + 2 * self.scaled(self.text_offset[1])
+        return self.true_height - 2 * self.scaled(self.text_offset[1])
 
 def Make_scroll_bar(self, scroll_bar):
     """
