@@ -169,6 +169,7 @@ class Button(Buttons):
     def Clear(self):
         self.value = 0 if self.mode.lower() == "count" else False
         self.Release_lock()
+        self.clicked
 
 
     def Draw(self, screen, pos = None):

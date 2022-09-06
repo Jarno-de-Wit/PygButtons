@@ -185,6 +185,7 @@ class TextBox(Buttons):
         self.value = ""
         self.is_selected = False
         #Lock is automatically released in property setter
+        self.new_input
 
 
     def Draw(self, screen, pos = None):

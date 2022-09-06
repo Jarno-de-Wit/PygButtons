@@ -190,6 +190,8 @@ class DropdownBox(Buttons):
         self.is_selected = False
         self.state = -1
         #Lock is automatically released in property setter
+        #Clear new_state
+        self.new_state
 
 
     def Draw(self, screen, pos = None):

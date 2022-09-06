@@ -162,6 +162,8 @@ class Slider(Buttons):
         self._value = self.start_value
         self.is_selected = False
         #Lock is automatically released in property setter
+        #Clear moved
+        self.moved
 
 
     def Draw(self, screen, pos = None):
