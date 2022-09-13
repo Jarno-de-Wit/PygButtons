@@ -239,20 +239,25 @@ class DropdownBox(Buttons):
         return
 
 
-    def Add_option(self, value, sort = False, set_to = False):
+    def Add_option(self, value, index = -1, set_to = False):
         """
         Add an option to the dropdown lists' options.
-        sort: bool - Whether the new value should be sorted between old values. If False, the value is simply appended to the end.
-        set_to: bool - Whether the new value should be automatically switched to as the currently selected option.
+        index: int, "sort" - The index the new value should be placed at (displacing the current value). Note: This implementation differs from list.insert() for negative indices, in that -1 will append at the end, and NOT before the last item, and so on. If index == "sort", the item will be placed before the first item which > value.
+        set_to: bool - Whether the new value should be automatically set as the currently selected option.
         """
         #Save and clear the state, as it can change by inserting a new button in between
         state = self._state
         self._state = -1
-        if sort:
-            #The index is the first item, for which value sorts before the item
-            index = min([ind for ind, option in enumerate(self.options) if value == sorted([value, option])[0]], default = len(self.options))
-        else:
-            index = len(self.options)
+        if isinstance(index, int):
+            #Convert the index to positive only to allow for list.insert() compatibility, and set_to to work properly
+            if index >= 0:
+                index = min(index, len(self.options))
+            else:
+                index = max(len(self.options) + 1 + index, 0)
+        elif index.lower() == "sort":
+            #The index is the first index where the next_value is > value
+            index = next((idx for idx, option in enumerate(self.options) if value < option), len(self.options))
+        else: raise ValueError(f"{index} is not a valid insertion index")
         self.options.insert(index, value)
         new_button = Button((self.left, self.bottom + self.spacing[1] + index * (self.height + self.spacing[1])),
                             (self.width - (self.scroll_bar.width + self.spacing[0] if self.scroll_bar else 0), self.height),
