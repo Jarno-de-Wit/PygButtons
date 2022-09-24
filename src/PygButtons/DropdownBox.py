@@ -302,20 +302,32 @@ class DropdownBox(Buttons):
         return
 
 
-    def Del_option(self, option = None, index = None):
+    def Del_option(self, index = None, *, option = None):
         """
         Allows an option to be removed from the dropdown list. The option can be indicated either by the options' value (option = value), or the options' index (index = value).
-        If the provided option does not exist, the function will cancel the operation gracefully.
+        If the provided option is valid, but does not exist, the function will cancel the operation gracefully.
+        index: None, int - The index of the option to be removed.
+        option: * - The value of the option to be removed.
+
+        Note: Only one of 'index' and 'value' can / should be used at any time. 'option' is intended primarily as an alternative selection method for when the index of the to-be-deleted item is not known.
 
         Returns:
         True if deletion was successful.
         False if deletion was unsuccessful.
         """
-        #Determine the index of the item to be removed, or cancel the operation if the given value is invalid
+        #Error checking / validation
+        #Test if both index and option are given
+        if option is not None and index is not None:
+            raise LookupError("Can only specify either 'option' or 'index', not both")
+        #Test if index (if given) is actually a valid index type (int)
+        elif index is not None and not isinstance(index, int):
+            raise TypeError(f"'index' should be type 'int' or None, not type '{type(index).__name__}'")
+
+        #Determine the index of the item to be removed, or cancel the operation if the given value is not present
         if isinstance(index, int):
             if index >= len(self.options) or -index > len(self.options): #If the index is invalid (too big positive, or too small negative)
                 return False
-            index %= len(self.options)
+            index %= len(self.options) #Turn any negative index into positive
         else:
             #Try to find the index of the specified item
             try:
