@@ -62,6 +62,7 @@ class Buttons():
         self.updated = True
         self.children = []
         self.scale = 1
+        self.groups = []
 
         #Tasks that require information from the child class
         self.size = size
@@ -121,6 +122,7 @@ class Buttons():
         for grp in groups:
             if grp is None:
                 continue
+            #Store the button in the global groups dict
             if grp in self.Buttons.groups:
                 #If the group exists, add self to the group, unless self is already in this group.
                 if not self in self.Buttons.groups[grp]:
@@ -128,6 +130,10 @@ class Buttons():
             #If the group doesn't exist, make a new group with self as the first list entry.
             else:
                 self.Buttons.groups[grp] = [self]
+
+            #Track the joined groups in the buttons' own groups list
+            if grp not in self.groups:
+                self.groups.append(grp)
 
     def Set_lock(self, claim = True):
         """
