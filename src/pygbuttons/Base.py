@@ -90,7 +90,7 @@ class Buttons():
         Returns all buttons inside the given group / groups.
         """
         #If a list of groups is given, return the buttons in all the groups combined.
-        if type(group) in (tuple, list):
+        if isinstance(group, (tuple, list)):
             lst = []
             for grp in group:
                 if grp in cls.groups:
@@ -173,7 +173,7 @@ class Buttons():
         cls.input_processed = False
 
         #Handle the Event appropriately
-        if type(event) != pygame.event.EventType:
+        if not isinstance(event, pygame.event.EventType):
             raise TypeError(f"Event should be type 'Event', not type {type(event).__name__}")
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
@@ -530,7 +530,7 @@ class Buttons():
         width, height = size
         #Set the background surface for the button. If one is provided, use
         # that one. Otherwise, make a new one with a solid color as given.
-        if type(inp) == pygame.Surface:
+        if isinstance(inp, pygame.Surface):
             return pygame.transform.scale(inp, size)
         elif inp is None:
             return pygame.Surface(size, pygame.SRCALPHA)
@@ -539,7 +539,7 @@ class Buttons():
         elif hasattr(inp[0], "__call__"): #If it is a tuple/list iterable with a function as its first item
             return inp[0](*(arg if arg != "*self*" else self for arg in inp[1:]))
         else:
-            if type(self.style) is int:
+            if isinstance(self.style, int):
                 corner_radius = max(0, self.scaled(self.style))
             elif self.style.lower() == "square":
                 corner_radius = 0
@@ -570,7 +570,7 @@ class Buttons():
             size = custom_size
         else:
             size = self.true_size
-        if type(style) is int:
+        if isinstance(style, int):
             corner_radius = max(0, self.scaled(style) - border_offset)
         elif style.lower() == "square":
             corner_radius = 0
@@ -598,7 +598,7 @@ class Buttons():
             raise ValueError("Given iterable contains too few items")
         if isinstance(data_types, (type, type(None))):
             data_types = [data_types]
-        #If data_types == None,    or    all ites are of an allowed data_type: everything is fine; Else, raise an error.
+        #If data_types == None,    or    all items are of an allowed data_type: everything is fine; Else, raise an error.
         if not (data_types[0] is None    or    all(type(item) in data_types for item in output)):
             raise TypeError(f"Incorrect data type for items in iterable")
         #Test if the iterator did not contain more items:

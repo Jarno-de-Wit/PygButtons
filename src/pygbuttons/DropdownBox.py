@@ -98,7 +98,7 @@ class DropdownBox(Buttons):
         self.new_state = False
         self.moved = True
 
-        if type(button_spacing) in (int, float):
+        if isinstance(button_spacing, (int, float)):
             self.spacing = (button_spacing, button_spacing)
         elif hasattr(button_spacing, "__iter__"):
             self.spacing = self.Verify_iterable(button_spacing, 2)

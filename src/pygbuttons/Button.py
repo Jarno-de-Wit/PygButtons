@@ -71,7 +71,7 @@ class Button(Buttons):
         super().__init__(pos, size, font_name, font_size, group, root, independent)
         self.orientation = orientation
         self.style = style
-        if type(mode) is not str:
+        if not isinstance(mode, str):
             raise TypeError(f"mode must be type 'str', not type {type(mode).__name__}")
         elif mode.lower() == "count":
             self.value = 0

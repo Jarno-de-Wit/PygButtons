@@ -86,9 +86,9 @@ class TextBox(Buttons):
 
         #Set the offset the text has from the sides of the text_box. In the end,
         #text_offset should be a tuple (x_offset, y_offset)
-        if type(text_offset) is int:
+        if isinstance(text_offset, int):
             self.text_offset = 2 * (text_offset,)
-        elif type(text_offset) is not str:
+        elif not isinstance(text_offset, str):
             self.text_offset = self.Verify_iterable(text_offset, 2)
         elif text_offset.lower() == "auto":
             #The automatic offset is calculated as 0.25 * font_size + max(border_width + border_offset for any of the borders)

@@ -68,9 +68,9 @@ class Text(Buttons):
         self.border = self.Verify_border(border)
 
         #Set the offset the text has from the sides of the text_box
-        if type(text_offset) is int:
+        if isinstance(text_offset, int):
             self.text_offset = 2 * (text_offset,)
-        elif type(text_offset) is not str:
+        elif not isinstance(text_offset, str):
             self.text_offset = self.Verify_iterable(text_offset, 2)
         elif text_offset.lower() == "auto":
             #The automatic offset is calculated as 0.25 * font_size + (border_width + border_offset if there is a border)
@@ -254,7 +254,7 @@ class Text(Buttons):
 
     @text.setter
     def text(self, value):
-        if type(value) is not str:
+        if not isinstance(value, str):
             raise TypeError(f"Text should be type str, not type {type(value).__name__}.")
 
         self.__text = value
@@ -271,7 +271,7 @@ class Text(Buttons):
 
         """
         #For external use only. Internally, all writing calls are directly to self.__lines
-        if type(value) not in (tuple, list,):
+        if not isinstance(value, (tuple, list,)):
             raise TypeError(f"Lines must be type 'tuple' or type 'list', not type {type(value).__name__}")
         self.__lines = tuple(value)
         self.__text = "\n".join(self.__lines)

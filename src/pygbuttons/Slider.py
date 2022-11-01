@@ -87,7 +87,7 @@ class Slider(Buttons):
         super().__init__(pos, size, groups = group, root = root, independent = independent) #We don't care about the font, as this Button will not contain any text
         #Initialise the basic parameters of the Slider
         self.__value_range = self.Verify_iterable(value_range, 2) #Directly written to the private property, to prevent a chicken - egg problem with self.value
-        if type(orientation) is int:
+        if isinstance(orientation, int):
             self.orientation = orientation
         elif orientation.lower() == "auto":
             self.orientation = int(self.width < self.height)
@@ -222,9 +222,9 @@ class Slider(Buttons):
         try:
             slider_size = self.slider.size
         except AttributeError: #During setup, the coords are required to construct the slider object. Therefore, when slider does not exist, instead take the size from the temporary value.
-            if type(self.tmp_slider_size) is int:
+            if isinstance(self.tmp_slider_size, int):
                 slider_size = 2 * (self.tmp_slider_size,)
-            elif type(self.tmp_slider_size) is not str:
+            elif not isinstance(self.tmp_slider_size, str):
                 slider_size = self.tmp_slider_size
             elif self.tmp_slider_size.lower() == "auto":
                 slider_size = 2 * (min(self.size),)
@@ -348,9 +348,9 @@ def Make_slider(self, style, size, background, accent_background, border, markin
     Make a slider Button.
     For internal use only. This function is therefore also not imported by __init__.py
     """
-    if type(size) is int:
+    if isinstance(size, int):
         size = 2 * (size,)
-    elif type(size) is not str:
+    elif not isinstance(size, str):
         pass
     elif size.lower() == "auto":
         #Primary direction: min(self.size)
