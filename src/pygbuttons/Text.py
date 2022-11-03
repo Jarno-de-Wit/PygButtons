@@ -288,16 +288,17 @@ class Text(Buttons):
         text_lines = self.text.rstrip("\n").split("\n")
         lines = []
         for line in text_lines:
-            words = line.split(" ")
+            words = line.replace("\t", 4*" ").split(" ")
             line_string = words[0]
             for word in words[1:]:
-                if self.font.size(" ".join([line_string, word]))[0] <= max_width: #If the next word still fits on this line:
+                if self.font.size(" ".join([line_string, word]))[0] <= max_width or not word: #If the next word still fits on this line:
+                    #This also absorbs any trailing spaces, such that they won't spill over into the next line
                     line_string = " ".join([line_string, word]) #Join it together with the existing text
                 else: #If the word is too long to fit on the line:
-                    lines.append(line_string)
+                    lines.append(line_string.rstrip(" "))
                     line_string = word #Place it on the next line.
             #Once all words are exhausted, append the remaining string to lines as well
-            lines.append(line_string)
+            lines.append(line_string.rstrip(" "))
         self.__lines = tuple(lines)
 
         if self.scroll_bar:
