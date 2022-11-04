@@ -4,6 +4,7 @@ from .Slider import Slider
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
 import pygame
+import math
 
 
 class Text(Buttons):
@@ -147,7 +148,7 @@ class Text(Buttons):
                 self.Draw_border(self.bg_surface, *self.border)
 
             font_height = self.font.get_height()
-            if self.px_height >= len(self.lines) * font_height:
+            if self.px_height >= self.text_px_height:
                 #If the text fully fits within the available space, calculate the vertical offset to get the right alignment
                 vert_offset = self.AlignY(len(self.lines) * font_height, self.px_height, self.text_align).top
             else:
@@ -155,12 +156,13 @@ class Text(Buttons):
                 vert_offset = 0
 
             #Build the surface containing ALL lines of text
-            self.text_surface =  pygame.Surface((self.px_width, font_height * len(self.lines) + vert_offset), pygame.SRCALPHA)
+            self.text_surface =  pygame.Surface((self.px_width, self.text_px_height + vert_offset), pygame.SRCALPHA)
 
             for line_nr, line in enumerate(self.lines):
-                line_surf = self.font.render(line, True, self.text_colour)
+                line_surf = self.font.render(line.rstrip("\r"), True, self.text_colour)
                 line_rect = line_surf.get_rect()
-                line_rect.top = line_nr * font_height + vert_offset
+                line_rect.top = vert_offset
+                vert_offset += font_height if not line.endswith("\r") else font_height // 2
                 line_rect = self.AlignX(line_rect, self.px_width, self.text_align)
                 self.text_surface.blit(line_surf, line_rect)
 
@@ -284,8 +286,10 @@ class Text(Buttons):
         Called automatically in *.Draw, after *.text is set / changed.
         """
         max_width = self.px_width
+        font_height = self.font.get_height()
         #Split the text into lines, ignoring any trailing newlines.
-        text_lines = self.text.rstrip("\n").split("\n")
+        #\r is turned into \r\n to make sure only one \r is on each line, and it actually ends the line too.
+        text_lines = self.text.replace("\r", "\r\n").rstrip("\n\r").split("\n")
         lines = []
         for line in text_lines:
             words = line.replace("\t", 4*" ").split(" ")
@@ -300,6 +304,8 @@ class Text(Buttons):
             #Once all words are exhausted, append the remaining string to lines as well
             lines.append(line_string.rstrip(" "))
         self.__lines = tuple(lines)
+
+        self.text_px_height = len(self.lines) * font_height - self.text.count("\r") * math.ceil(font_height / 2)
 
         if self.scroll_bar:
             self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(1, (self.height - 2 * self.text_offset[1]) / (len(self.lines) * self.font_size))))
