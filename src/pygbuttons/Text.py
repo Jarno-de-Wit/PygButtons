@@ -150,7 +150,7 @@ class Text(Buttons):
             font_height = self.font.get_height()
             if self.px_height >= self.text_px_height:
                 #If the text fully fits within the available space, calculate the vertical offset to get the right alignment
-                vert_offset = self.AlignY(len(self.lines) * font_height, self.px_height, self.text_align).top
+                vert_offset = self.AlignY(self.text_px_height, self.px_height, self.text_align).top
             else:
                 #If the text requires scrolling, vertical alignment doesn't matter anymore (all vertical alignment is taken over by the scrolled value)
                 vert_offset = 0
