@@ -170,7 +170,7 @@ class Text(Buttons):
 
         if self.moved:
             #Blit the fully rendered text surface onto a limiter surface.
-            text_limiter = pygame.Surface((self.px_width, self.true_height - 2 * self.scaled(self.text_offset[1])), pygame.SRCALPHA)
+            text_limiter = pygame.Surface((self.px_width, self.px_height), pygame.SRCALPHA)
             text_limiter.blit(self.text_surface, (0, -self.scrolled_px))
 
             #Blit the text surface onto the actual background
@@ -214,19 +214,15 @@ class Text(Buttons):
 
     @property
     def scrolled_px(self):
-        #Calculate the required height (in px)
-        req_height = self.font.get_height() * len(self.lines)
         #Calculate the required height change that has to be accomodated by scrolling (in px)
-        max_scroll_height = max(0, req_height - self.true_height + 2 * self.scaled(self.text_offset[1])) #Get the total distance (in px) the surface must be scrolled
+        max_scroll_height = max(0, self.text_px_height - self.true_height + 2 * self.scaled(self.text_offset[1])) #Get the total distance (in px) the surface must be scrolled
 
         return round(max_scroll_height * self.scrolled)
 
     @scrolled_px.setter
     def scrolled_px(self, value):
-        #Calculate the required height (in px)
-        req_height = self.font.get_height() * len(self.lines)
         #Calculate the required height change that has to be accomodated by scrolling (in px)
-        max_scroll_height = max(0, req_height - self.true_height + 2 * self.scaled(self.text_offset[1])) #Get the total distance (in px) the surface must be scrolled
+        max_scroll_height = max(0, self.text_px_height - self.true_height + 2 * self.scaled(self.text_offset[1])) #Get the total distance (in px) the surface must be scrolled
 
         if max_scroll_height:
             self.scrolled = value / max_scroll_height
@@ -308,7 +304,7 @@ class Text(Buttons):
         self.text_px_height = len(self.lines) * font_height - self.text.count("\r") * math.ceil(font_height / 2)
 
         if self.scroll_bar:
-            self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(1, (self.height - 2 * self.text_offset[1]) / (len(self.lines) * self.font_size))))
+            self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(1, (self.height - 2 * self.text_offset[1]) / self.text_px_height)))
 
         self.scrolled += 0 #Update the 'scrolled' value, to take into account that after rebuilding, the length of 'lines' might be different
 
