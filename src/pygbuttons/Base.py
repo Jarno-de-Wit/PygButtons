@@ -183,6 +183,10 @@ class Buttons():
             if event.button == 1:
                 cls.LMB_down(event.pos, group)
             elif event.button == 2:
+                return
+                cls.MMB_down(event.pos, group)
+            elif event.button == 3:
+                return
                 cls.RMB_down(event.pos, group)
             elif event.button > 3:
                 cls.Scroll(cls.convert_scroll(event.button), event.pos, group)
@@ -190,6 +194,10 @@ class Buttons():
             if event.button == 1:
                 cls.LMB_up(event.pos, group)
             elif event.button == 2:
+                return
+                cls.MMB_up(event.pos, group)
+            elif event.button == 3:
+                return
                 cls.RMB_up(event.pos, group)
         elif event.type == pygame.KEYDOWN:
             cls.Key_down(event, group)
