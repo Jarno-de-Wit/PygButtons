@@ -85,6 +85,7 @@ class Slider(Buttons):
         #Note: 'Slider' (captialised) in commments etc. refers to the main object (self)
         #      'slider' (non-capitalised) refers to the button that moves along the Slider (self.slider)
         super().__init__(pos, size, groups = group, root = root, independent = independent) #We don't care about the font, as this Button will not contain any text
+        self.functions = functions
         #Initialise the basic parameters of the Slider
         self.__value_range = self.Verify_iterable(value_range, 2) #Directly written to the private property, to prevent a chicken - egg problem with self.value
         if isinstance(orientation, int):
@@ -106,47 +107,51 @@ class Slider(Buttons):
         #Create the sliding object (from now on referred to as "slider" (lower case))
         self.tmp_slider_size = slider_size
         self.slider = Make_slider(self, style, slider_size, slider_background, slider_accent_background, slider_border, markings, edge_markings, snap_radius, slider_feature_text, slider_feature_colour, slider_feature_align, slider_feature_font, slider_feature_size, self.orientation)
-        self._value = self.start_value = start_value
+        self.value = self.start_value = start_value
         del self.tmp_slider_size
         self.children.append(self.slider)
 
         #Other
         self.is_selected = False
-        self.moved = True #Indicates whether there is a chance the slider has moved. If so, the user can take action (if necessary).
-        self.functions = functions
+        self.moved = False #Indicates whether there is a chance the slider has moved. If so, the user can take action (if necessary).
+        self.clicked = False
         self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are set-up correctly
 
 
     def LMB_down(self, pos):
         if self.slider.contains(pos):
-            self.is_selected = True
             self.slider.LMB_down(pos)
             self.Set_lock()
-            self.moved = True
             self._moved = True #Instruct the button that value is no longer equal to the value stored in __value
+            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                self.is_selected = True
+                if Buttons._update_flags:
+                    self.moved = True
         elif self.contains(pos):
-            self.is_selected = True
             #Move the slider to where we clicked (within limits of course)
             self.slider.LMB_down(self.slider.scaled(self.slider.center))
             self.Set_cursor_pos(pos)
             self.Set_lock()
-        return
+            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                self.is_selected = True
+                if Buttons._update_flags:
+                    self.moved = True
 
     def LMB_up(self, pos):
         if self.is_selected:
             self.slider.LMB_up(pos)
-            self.is_selected = False
-            self.moved = True #To make sure the button get's re-drawn correctly with the right background
-            self._moved = True
-        return
+            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                self.is_selected = False
 
     def Set_cursor_pos(self, pos):
         if self.is_selected:
             slider_pos = self.slider.topleft
             self.slider.Set_cursor_pos(pos)
             if self.slider.topleft != slider_pos:
-                self.moved = True
                 self._moved = True
+                with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                    if Buttons._update_flags:
+                        self.moved = True
 
 
     def Scale(self, scale, relative_scale = True, *, center = (0, 0), px_center = None):
@@ -159,11 +164,10 @@ class Slider(Buttons):
 
     def Clear(self):
         #Reset the slider position to its inital value
-        self._value = self.start_value
-        self.is_selected = False
+        with Buttons.Callbacks(False, False), Buttons.Update_flags(False, False):
+            self.value = self.start_value
+            self.is_selected = False
         #Lock is automatically released in property setter
-        #Clear moved
-        self.moved
 
 
     def Draw(self, screen, pos = None):
@@ -244,9 +248,10 @@ class Slider(Buttons):
         """
         if args: #If the user passed the values in as two separate values, combine them into one tuple
             range = (range, args[0])
-        self._value #Flush any _moved arguments, in case they haven't been processed yet.
-        self.value_range = tuple(range) #Update the slider range
-        self.value = self.Clamp(self._value, *sorted(self.value_range)) #Reset the value, to update the sliders' position
+        with Buttons.Callbacks(False, True), Buttons.Update_flags(False, True):
+            self.value #Flush any _moved arguments, in case they haven't been processed yet.
+            self.value_range = tuple(range) #Update the slider range
+        self.value = self.Clamp(self.value, *sorted(self.value_range)) #Reset the value, to update the sliders' position
 
     def Set_slider_primary(self, value, limit_size = True):
         """
@@ -257,14 +262,15 @@ class Slider(Buttons):
         if limit_size:
             #Make sure the slider primary can not accidentally be set too low.
             value = max(value, round(self.rotated(self.slider.size)[1] / 2))
-        self._value #Flush any _moved arguments, in case they haven't been processed yet.
+        self.value #Flush any _moved arguments, in case they haven't been processed yet.
         if self.orientation % 2: #Update the sliders' size
             if self.slider.height != value:
                 self.slider.height = value
         else:
             if self.slider.width != value:
                 self.slider.width = value
-        self._value = self._value #Reset the value to update the sliders' position
+        with Buttons.Callbacks(False, True), Buttons.Update_flags(False, True):
+            self.value = self.value #Reset the value to update the sliders' position
         #Update the sliders' snap points
         self.slider.snap = self.rotated(tuple(self.rotated(self.topleft)[0] - value / 2 + coord for coord in self.Marking_coords()), ()) + (self.slider.snap[2],)
         self.updated = True
@@ -273,19 +279,22 @@ class Slider(Buttons):
     @property
     def is_selected(self):
         return self.__is_selected
-
     @is_selected.setter
     def is_selected(self, value):
         if value: #If the user selects the text box:
             self.__is_selected = True
             self.Set_lock()
+            if Buttons._update_flags:
+                self.clicked = True
         else: #If the user deselects the box:
             self.__is_selected = False
             self.Release_lock()
+            if Buttons._update_flags:
+                self.clicked = True
 
     @property
-    def _value(self):
-        #Note: No need to run ._Call() anywhere in this code. The fact that the .__value is only updated here isn't important. It was already called when the slider was actually moved.
+    def value(self):
+        #Note: No need to run ._Call() anywhere in this code. The fact that the .__value is only updated here isn't important. It was already called by the slider when it was actually moved.
         if self._moved: #If the user clicked on the slider, the value should be re-calculated from the slider position. If not, the value should be exactly what the user set.
             pos = round(self.rotated(self.offset(self.slider.topleft, self.topleft, (-1, -1)))[0])
             coord_range = self.rotated(self.size)[0] - self.rotated(self.slider.size)[0] #The available pixels for the slider to move in
@@ -295,9 +304,8 @@ class Slider(Buttons):
                 self.__value = self.Clamp(self.value_range[0] + pos / coord_range * (self.value_range[1] - self.value_range[0]), *sorted(self.value_range))
             self._moved = False
         return self.__value
-
-    @_value.setter
-    def _value(self, val):
+    @value.setter
+    def value(self, val):
         val = self.Clamp(val, *sorted(self.value_range))
         if self.value_range[0] == self.value_range[1]:
             self.slider.center = self.center
@@ -306,34 +314,36 @@ class Slider(Buttons):
             self.slider.topleft = self.rotated(self.rotated(self.topleft)[0] + (val - self.value_range[0]) / (self.value_range[1] - self.value_range[0]) * coord_range, self.rotated(self.center)[1] - self.rotated(self.slider.size)[1] / 2)
         self.__value = val
         self._moved = False
+        self._Call("Move")
+        if Buttons._update_flags:
+            self.moved = True
 
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, val):
-        self._value = val
-        self.root._Call("Move")
 
     @property
     def value_range(self):
         return self.__value_range
-
     @value_range.setter
     def value_range(self, value):
         self.__value_range = self.Verify_iterable(value, 2)
-        self._value += 0
+        self.value += 0
 
     @property
     def moved(self):
         moved = self.__moved
         self.__moved = False
         return moved
-
     @moved.setter
     def moved(self, value):
         self.__moved = value
+
+    @property
+    def clicked(self):
+        clicked_ = self.__clicked
+        self.__clicked = False
+        return clicked_
+    @clicked.setter
+    def clicked(self, value):
+        self.__clicked = value
 
     @property
     def slider_feature_align(self):

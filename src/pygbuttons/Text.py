@@ -61,6 +61,7 @@ class Text(Buttons):
         Create a Text Button object. See help(type(self)) for more detailed information.
         """
         super().__init__(pos, size, font_name, font_size, group, root, independent)
+        self.functions = functions
         self.style = style
         self.text_colour = self.Verify_colour(text_colour)
         self.text_align = text_align
@@ -85,7 +86,7 @@ class Text(Buttons):
         else:
             self.scroll_bar = None
         self.__scrolled = 0
-        self.functions = functions
+        self.moved = False
         self.text = text
         self.Build_lines()
         self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are set-up correctly
@@ -93,27 +94,32 @@ class Text(Buttons):
 
     def LMB_down(self, pos):
         if self.scroll_bar:
-            self.scroll_bar.LMB_down(pos)
+            #Force flags to True, since flags are used internally to check for movement
+            with Buttons.Update_flags(True, True):
+                self.scroll_bar.LMB_down(pos)
             if self.Buttons.input_claim: #If the slider contained the position, and now claimed the input, set self as the lock
                 self.Set_lock()
 
 
     def LMB_up(self, pos):
         if self.scroll_bar:
-            self.scroll_bar.LMB_up(pos)
+            with Buttons.Update_flags(True, True):
+                self.scroll_bar.LMB_up(pos)
             if self.Buttons.input_claim:
                 self.Release_lock()
 
 
     def Set_cursor_pos(self, pos):
         if self.scroll_bar:
-            self.scroll_bar.Set_cursor_pos(pos)
+            with Buttons.Update_flags(True, True):
+                self.scroll_bar.Set_cursor_pos(pos)
 
 
     def Scroll(self, value, pos):
         if not self.contains(pos): #If the mouse was not within the text box:
             return
-        self.scrolled_px += self.Buttons.scroll_factor * value
+        with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+            self.scrolled_px += self.Buttons.scroll_factor * value
         self.Claim_input()
 
 
@@ -135,12 +141,12 @@ class Text(Buttons):
         """
         Draw the button to the screen.
         """
-        self.scrolled #Update the scrolled position quickly, so that any .moved = True are set
+        self._scrolled #Update the scrolled position quickly, so that any .moved = True are set
         pos = pos or self.scaled(self.topleft)
 
         if self.updated:
             self.Build_lines()
-            self.moved = True
+            self._moved = True
 
             #Make the background surface
             self.bg_surface = self.Make_background_surface(self.bg)
@@ -168,7 +174,7 @@ class Text(Buttons):
 
             self.updated = False
 
-        if self.moved:
+        if self._moved:
             #Blit the fully rendered text surface onto a limiter surface.
             text_limiter = pygame.Surface((self.px_width, self.px_height), pygame.SRCALPHA)
             text_limiter.blit(self.text_surface, (0, -self.scrolled_px))
@@ -179,7 +185,7 @@ class Text(Buttons):
 
             if self.scroll_bar:
                 self.scroll_bar.Draw(self.surface, tuple(round(i) for i in self.relative(self.scroll_bar.scaled(self.scroll_bar.topleft))))
-            self.moved = False
+            self._moved = False
 
         screen.blit(self.surface, pos)
         return
@@ -192,23 +198,33 @@ class Text(Buttons):
         """
         self.text += value
 
-
     @property
     def scrolled(self):
-        if self.scroll_bar and self.scroll_bar.moved:
-            self.__scrolled = self.scroll_bar.value
-            self.moved = True
-        return self.__scrolled
-
+        return self._scrolled
     @scrolled.setter
     def scrolled(self, value):
+        with Buttons.Callbacks(False, False), Buttons.Update_flags(False, False):
+            self._scrolled = value
+
+    @property
+    def _scrolled(self):
+        if self.scroll_bar and self.scroll_bar.moved:
+            self.__scrolled = self.scroll_bar.value
+            self._moved = True
+        return self.__scrolled
+    @_scrolled.setter
+    def _scrolled(self, value):
         #Make sure the scrolled value cannot exceed the limits of the space in the box
         value = self.Clamp(value, 0, 1)
-        self.moved = True
+        self._moved = True
 
         self.__scrolled = value
         if self.scroll_bar:
-            self.scroll_bar.value = value
+            with Buttons.Callbacks(False, True):
+                self.scroll_bar.value = value
+        self._Call("Move")
+        if self._update_flags:
+            self.moved = True
 
         return
 
@@ -217,7 +233,7 @@ class Text(Buttons):
         #Calculate the required height change that has to be accomodated by scrolling (in px)
         max_scroll_height = max(0, self.text_px_height - self.true_height + 2 * self.scaled(self.text_offset[1])) #Get the total distance (in px) the surface must be scrolled
 
-        return round(max_scroll_height * self.scrolled)
+        return round(max_scroll_height * self._scrolled)
 
     @scrolled_px.setter
     def scrolled_px(self, value):
@@ -225,7 +241,7 @@ class Text(Buttons):
         max_scroll_height = max(0, self.text_px_height - self.true_height + 2 * self.scaled(self.text_offset[1])) #Get the total distance (in px) the surface must be scrolled
 
         if max_scroll_height:
-            self.scrolled = value / max_scroll_height
+            self._scrolled = value / max_scroll_height
 
 
     @property
@@ -274,6 +290,15 @@ class Text(Buttons):
         self.__lines = tuple(value)
         self.__text = "\n".join(self.__lines)
         self.updated = True
+
+    @property
+    def moved(self):
+        moved = self.__moved
+        self.__moved = False
+        return moved
+    @moved.setter
+    def moved(self, value):
+        self.__moved = value
 
 
     def Build_lines(self):

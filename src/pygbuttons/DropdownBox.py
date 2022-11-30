@@ -35,14 +35,13 @@ class DropdownBox(Buttons):
                     - "Select": Called whenever the DropdownBox is selected (dropped down).
                     - "Deselect": Called whenever the DropdownBox is deselected.
                     - "Update": Called whenever the state is changed.
-                    - "Move": Called whenever the dropdown area is scrolled.
     groups: None, [___, ___] - A list of all groups to which a button is to be added.
     root: None, Button - The Button that is considered the 'root element' for this Button. Any function calls that need to include a 'self' Button, will include this root Button instead.
     independent: bool - Determines whether or not the button is allowed to set the input_lock, and is added to buttons.list_all. Mostly important for buttons which are part of another button.
 
 
     Inputs:
-    *.state: int - Sets the index of the currently selected option. Set negative to deselect all options
+    *.state: int - Sets the index of the currently selected option. Set negative to deselect all options.
     *.Add_option(*) - Adds an option to the list of possible options. See help(*.Add_option) for more information.
     *.Del_option(*) - Removes an option from the list of possible options. See help(*.Del_option) for more information.
 
@@ -52,6 +51,7 @@ class DropdownBox(Buttons):
     *.new_state: bool - Whether the DropdownBox has been set to a new state since the last time this variable was checked. Automatically resets once it is querried.
 
     *.is_selected: bool - Whether this DropdownBox object is selected at this point in time. I.E. Whether DropdownBox is expanded.
+    *.clicked: bool - Whether the DropdownBox has been clicked anywhere (except the scroll bar), thus changing from selected to deselected (or vice versa).
     """
     actions = ["LMB_down", "LMB_up", "Set_cursor_pos", "Scroll"]
     def __init__(self, pos, size,
@@ -81,6 +81,7 @@ class DropdownBox(Buttons):
         Create a DropdownBox Button object. See help(type(self)) for more detailed information.
         """
         super().__init__(pos, size, font_name, font_size, group, root, independent)
+        self.functions = functions
         self.__option_align = option_align
         self.hint = hint
         self.__hint_align = hint_align
@@ -93,10 +94,11 @@ class DropdownBox(Buttons):
 
         self.options = []
         self.button_list = []
-        self.__state = -1
         self.__scrolled = 0
         self.new_state = False
-        self.moved = True
+        self.clicked = False
+        self.__state = -1
+        self._moved = True
 
         if isinstance(button_spacing, (int, float)):
             self.spacing = (button_spacing, button_spacing)
@@ -108,11 +110,11 @@ class DropdownBox(Buttons):
         self.dropdown_bg = self.Verify_background(dropdown_background)
         self.display_length = display_length
         #Create the arrow button
-        self.arrow = Button((self.right - self.height, self.top), (self.height, self.height), border = border, background = (Arrow_bg, "*self*", self.bg, self.accent_bg), accent_background = None, style = style, mode = "Toggle", root = self.root, independent = True)
+        self.arrow = Button((self.right - self.height, self.top), (self.height, self.height), border = border, background = (Arrow_bg, "*self*", self.bg, self.accent_bg), accent_background = None, style = style, mode = "Toggle", independent = True)
         self.children.append(self.arrow)
 
         #Make the button containing the information about the currently selected option.
-        self.main_button = Button(self.topleft, (self.width - self.height - self.spacing[0], self.height), font_name = font_name, font_size = font_size, border = border, background = background, accent_background = accent_background, style = style, root = self.root, independent = True)
+        self.main_button = Button(self.topleft, (self.width - self.height - self.spacing[0], self.height), font_name = font_name, font_size = font_size, border = border, background = background, accent_background = accent_background, style = style, independent = True)
         self.children.append(self.main_button)
 
         if scroll_bar:
@@ -125,7 +127,6 @@ class DropdownBox(Buttons):
         self.text_colour = self.Verify_colour(text_colour)
         self.hint_colour = self.Verify_colour(hint_colour)
 
-        self.functions = functions
         #Add in all the options
         for option in options:
             self.Add_option(option)
@@ -136,15 +137,16 @@ class DropdownBox(Buttons):
         #Test if any of the two header boxes was clicked:
         if self.main_button.contains(pos):
             self.Claim_input()
-            self.is_selected = not self.is_selected
-            self.updated = True
+            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                self.is_selected = not self.is_selected
         elif self.arrow.contains(pos):
             self.Claim_input()
-            self.is_selected = not self.is_selected
-            self.updated = True
+            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                self.is_selected = not self.is_selected
         #Test if the scroll_bar (if any) contained the location
         elif self.scroll_bar and self.scroll_bar.contains(pos):
-            self.scroll_bar.LMB_down(pos)
+            with Buttons.Update_flags(True, True):
+                self.scroll_bar.LMB_down(pos)
             self.Set_lock()
         #Test if the any of the buttons in the dropdown space contain the clicking point
         elif self.is_selected and self.is_within(pos, (self.scaled(self.left), self.scaled(self.bottom) + self.scaled(self.spacing[1])), (self.scaled(self.right), self.scaled(self.bottom) + self.scaled(self.spacing[1]) + self._true_pixel_length)):
@@ -153,20 +155,25 @@ class DropdownBox(Buttons):
             #Calculate the new relative pos, when it is taken relative to the dropdown spaces' coordinates
             for button_nr, button in enumerate(self.button_list):
                 if button.contains((pos[0], pos[1] + self.scrolled_px)):
-                    self.state = button_nr
-                    self.is_selected = False
+                    with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                        self._state = button_nr
+                        self.is_selected = False
                     #Stop checking from here, as no buttons overlap, thus no other buttons will .contain(rel_pos)
                     return
+        #If self does not contain the clicked loation, but is selected, deselect self
         elif self.is_selected:
-            self.is_selected = False
+            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                self.is_selected = False
 
     def LMB_up(self, pos):
-        if self.scroll_bar:
-            self.scroll_bar.LMB_up(pos)
+        if self.is_selected and self.scroll_bar:
+            with Buttons.Update_flags(True, True):
+                self.scroll_bar.LMB_up(pos)
 
     def Set_cursor_pos(self, pos):
-        if self.scroll_bar:
-            self.scroll_bar.Set_cursor_pos(pos)
+        if self.is_selected and self.scroll_bar:
+            with Buttons.Update_flags(True, True):
+                self.scroll_bar.Set_cursor_pos(pos)
 
 
     def Scroll(self, value, pos):
@@ -188,10 +195,9 @@ class DropdownBox(Buttons):
 
     def Clear(self):
         self.is_selected = False
+        #Note: Setting .state, since this by default has callbacks and flags disabled
         self.state = -1
         #Lock is automatically released in property setter
-        #Clear new_state
-        self.new_state
 
 
     def Draw(self, screen, pos = None):
@@ -207,8 +213,8 @@ class DropdownBox(Buttons):
         self.scrolled
         #If the box has been updated, re-draw this stuff:
         if self.updated:
-            #Set self.moved to True to make sure the dropdown_surface also gets updated to the latest state
-            self.moved = True
+            #Set self._moved to True to make sure the dropdown_surface also gets updated to the latest state
+            self._moved = True
             #Draw the main / header surface
             #Re-draw self.surface (containing the header and the arrow)
             self.surface = self.Make_background_surface(None)
@@ -223,14 +229,14 @@ class DropdownBox(Buttons):
 
             self.updated = False
 
-        if self.moved:
+        if self._moved:
             #re-draw self.dropdown_surface (The cut-to-size version of self.button_surface), including the potential scroll_bar
             self.dropdown_surface = self.Make_background_surface(self.dropdown_bg, (self.true_width, self._true_pixel_length))
             self.dropdown_surface.blit(self.button_surface, (0, -self.scrolled_px))
             if self.scroll_bar:
                 self.scroll_bar.Draw(self.dropdown_surface, (self.true_width - self.scroll_bar.true_width, 0))
 
-            self.moved = False
+            self._moved = False
 
 
         if self.is_selected:
@@ -247,7 +253,9 @@ class DropdownBox(Buttons):
         """
         #Save and clear the state, as it can change by inserting a new button in between
         state = self._state
-        self._state = -1
+        #With forcibly disabled updates, temporarily clear the current state.
+        with Buttons.Callbacks(False, True), Buttons.Update_flags(False, True):
+            self._state = -1
         if isinstance(index, int):
             #Convert the index to positive only to allow for list.insert() compatibility, and set_to to work properly
             if index >= 0:
@@ -270,7 +278,6 @@ class DropdownBox(Buttons):
                             font_name = self.font_name,
                             font_size = self.font_size,
                             border = self.border,
-                            root = self.root,
                             independent = True
                             )
         self.button_list.insert(index, new_button)
@@ -281,13 +288,16 @@ class DropdownBox(Buttons):
         for button in self.button_list[index + 1:]:
             button.top += self.height + self.spacing[1]
 
-        #Set self.state to the correct value again
+        #Set self._state to the correct value again
+        #Note: Callbacks and flags are (optionally) enabled when set_to is True
+        #Note: Callbacks and flags are forcibly disabled when set_to is False, because the selected item did not change.
         if set_to:
             self.state = index #Set the new state, including running ._Call
         elif index <= self._state: #If the new item is before the current one, shift the index by 1 as well, and don't run ._Call
-            self._state = state + 1
+            with Buttons.Callbacks(False, True), Buttons.Update_flags(False, True):
+                self._state = state + 1
         else: #Otherwise, set the state back to what it was already
-            self._state = state
+            self.state = state
 
         #Update the scroll_bar size if present
         if self.scroll_bar:
@@ -337,7 +347,8 @@ class DropdownBox(Buttons):
 
         #Save and clear the state, as it can change by removing a button
         state = self._state
-        self._state = -1
+        with Buttons.Callbacks(False, True), Buttons.Update_flags(False, True):
+            self._state = -1
 
         #Remove all references to the button / option from this butttons' lists
         self.children.remove(self.button_list[index])
@@ -350,13 +361,14 @@ class DropdownBox(Buttons):
 
         #Reduce the state by 1, if the selected button came after the current button
         if state > index:
-            self._state = state - 1
+            with Buttons.Callbacks(False, True), Buttons.Update_flags(False, True):
+                self._state = state - 1
         elif state < index:
-            self._state = state
+            with Buttons.Callbacks(False, True), Buttons.Update_flags(False, True):
+                self._state = state
         else:
-            #If state == index, don't change self.state again. In that case, the selected item was the one which was removed, so we shouldn't set a new item.
-            #._Call should still be run though as the state did change.
-            self.root._Call("Update")
+            #If state == index, re-set the state to -1, with callbacks (optionally) disabled.
+            self.state = -1
 
         #Update the scroll_bar size if present
         if self.scroll_bar:
@@ -374,21 +386,33 @@ class DropdownBox(Buttons):
 
     @property
     def value(self):
+        return self._value
+    @value.setter
+    def value(self, value):
+        with Buttons.Callbacks(False, False), Buttons.Update_flags(False, False):
+            self._value = value
+    @property
+    def _value(self):
         if self._state >= 0:
             return self.options[self._state]
         else:
             return None
-    @value.setter
-    def value(self, value):
+    @_value.setter
+    def _value(self, value):
         if value in self.options:
-            self.state = self.options.index(value)
+            self._state = self.options.index(value)
         elif value is None:
-            self.state = -1
+            self._state = -1
         else:
             raise ValueError("Value not in options list")
 
-    #_state is for internal use only. It allows the Button to update the state, without accidentally triggering the ._Call.
-    # In doing so, it allows any user-set values to still run ._Call, and perform all required checks with minimal code duplicates.
+    @property
+    def state(self):
+        return self._state
+    @state.setter
+    def state(self, value):
+        with Buttons.Callbacks(False, False), Buttons.Update_flags(False, False):
+            self._state = value
     @property
     def _state(self):
         return self.__state
@@ -412,18 +436,12 @@ class DropdownBox(Buttons):
             self.main_button.text = self.hint
             self.main_button.text_colour = self.hint_colour
             self.main_button.text_align = self.hint_align
-        self.new_state = True
         self.updated = True
-        self.moved = True
+        self._moved = True
+        self._Call("Update")
+        if Buttons._update_flags:
+            self.new_state = True
 
-
-    @property
-    def state(self):
-        return self.__state
-    @state.setter
-    def state(self, value):
-        self._state = value
-        self.root._Call("Update")
 
     @property
     def new_state(self):
@@ -432,21 +450,21 @@ class DropdownBox(Buttons):
         return new_state
     @new_state.setter
     def new_state(self, value):
-        self.__new_state = True
+        self.__new_state = value
 
 
     @property
     def scrolled(self):
-        if self.scroll_bar and self.scroll_bar.moved:
+        if self.scroll_bar and (self.scroll_bar.moved + self.scroll_bar.clicked):
             self.__scrolled = self.scroll_bar.value
-            self.moved = True
+            self._moved = True
         return self.__scrolled
 
     @scrolled.setter
     def scrolled(self, value):
         #Make sure the scrolled value cannot exceed the limits of the space in the box
         value = self.Clamp(value, 0, 1)
-        self.moved = True
+        self._moved = True
 
         self.__scrolled = value
         if self.scroll_bar:
@@ -488,14 +506,16 @@ class DropdownBox(Buttons):
         elif value:
             self.arrow.value = True
             self.Set_lock()
-            self.root._Call("Select")
+            self._Call("Select")
         else:
             self.arrow.value = False
             self.scrolled = 0
-            self.moved = True
+            self._moved = True
             self.Release_lock(False)
-            self.root._Call("Deselect")
+            self._Call("Deselect")
         self.updated = True
+        if Buttons._update_flags:
+            self.clicked = True
 
 
     @property
@@ -551,6 +571,17 @@ class DropdownBox(Buttons):
         else:
             return self.scaled(self.bottom + self.spacing[1] + self._display_pixel_length) - self.scaled(self.bottom + self.spacing[1])
 
+
+    @property
+    def clicked(self):
+        clicked_ = self.__clicked
+        self.__clicked = False
+        return clicked_
+    @clicked.setter
+    def clicked(self, value):
+        self.__clicked = value
+
+
 def Arrow_bg(self, bg, accent_bg):
     """
     The function that will create the background for the dropdown arrow button.
@@ -589,7 +620,6 @@ def Make_scroll_bar(self, scroll_bar):
         scroll_bar.right = self.right
         scroll_bar.height = self._display_pixel_length
         scroll_bar.top = self.bottom
-        scroll_bar.root = self.root
         return scroll_bar
     if scroll_bar == 1:
         size = (15, self._display_pixel_length)
@@ -600,12 +630,12 @@ def Make_scroll_bar(self, scroll_bar):
         slider_bg = (220, 220, 220)
         slider_accent_bg = (127, 127, 127)
         slider_border = None
-        return Slider(pos, size, style = style, background = background, border = border, slider_background = slider_bg, slider_border = slider_border, orientation = 1, root = self.root, independent = True)
+        return Slider(pos, size, style = style, background = background, border = border, slider_background = slider_bg, slider_border = slider_border, orientation = 1, independent = True)
     elif scroll_bar == 2:
         size = (15, self._display_pixel_length)
         pos = (self.right - size[0], self.bottom)
         slider_feature_text = "|||"
         slider_feature_size = 9
-        return Slider(pos, size, slider_feature_text = slider_feature_text, slider_feature_size = slider_feature_size, orientation = 1, root = self.root, independent = True)
+        return Slider(pos, size, slider_feature_text = slider_feature_text, slider_feature_size = slider_feature_size, orientation = 1, independent = True)
     else:
         raise ValueError(f"Unsupported scroll_bar style: {repr(scroll_bar)}")

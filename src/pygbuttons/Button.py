@@ -43,6 +43,7 @@ class Button(Buttons):
     Outputs:
     *.value: int, bool - The current state in the Button. If mode == "count", the amount of times (int) the Button was clicked. If mode == "Toggle" or "hold", whether the button is currently in the pressed / down state (bool).
     *.clicked: bool - Whether the Button has been set to a new state since the last time this variable was checked. Automatically resets once it is querried.
+    *.moved: bool - Whether the Button has been dragged to a different location since the last time this variable was checked. Automatically resets once it is querried.
     """
     actions = ["LMB_down", "LMB_up", "RMB_down", "Set_cursor_pos"]
     def __init__(self, pos, size,
@@ -71,6 +72,7 @@ class Button(Buttons):
         super().__init__(pos, size, font_name, font_size, group, root, independent)
         self.orientation = orientation
         self.style = style
+        self.functions = functions
         if not isinstance(mode, str):
             raise TypeError(f"mode must be type 'str', not type {type(mode).__name__}")
         elif mode.lower() == "count":
@@ -80,7 +82,6 @@ class Button(Buttons):
         else:
             raise ValueError(f"Unsupported button mode '{mode}'")
         self.mode = mode.lower()
-        self.clicked = False #Make sure the button does not register any ghost inputs at the start
         self.text = text
         self.text_colour = self.Verify_colour(text_colour)
         self.text_align = text_align
@@ -94,41 +95,37 @@ class Button(Buttons):
         limits = self.Verify_iterable(limits, 4)
         self.limits = list(value if value is not None else ( (-1) ** (i + 1) * math.inf) for i, value in enumerate(limits))
         self.snap = self.Verify_iterable(snap, 3)
-        self.functions = functions
+        self.moved = False
+        self.clicked = False
         self.Draw(pygame.Surface((1, 1))) #Makes sure all attributes are prepared and set-up correctly
 
 
     def LMB_down(self, pos):
         if self.contains(pos):
-            self.clicked = True
-            if self.mode == "none": #Just here for consistency / clarity. Does nothing.
-                pass
-            elif self.mode == "count":
-                self.value += 1
-            elif self.mode == "toggle":
-                self.value = not self.value
-            elif self.mode == "hold":
-                self.Set_lock()
-                self.value = True
-                if any(self.dragable):
-                    self.drag_pos = self.relative(pos)
-            self.Claim_input()
-
-            if self.mode == "toggle" and not self.value: #If the button is toggled OFF, _Call release. For all other cases, _Call click
-                self.root._Call("Release")
-            else:
-                self.root._Call("Click")
-        return
+            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                if self.mode == "none":
+                    self._Call("Click") #Call "Click" separately since "none" does not change self.value
+                    if Buttons._update_flags:
+                        self.clicked = True
+                elif self.mode == "count":
+                    self.value += 1
+                elif self.mode == "toggle":
+                    self.value = not self.value
+                elif self.mode == "hold":
+                    self.Set_lock()
+                    self.value = True
+                    if any(self.dragable):
+                        self.drag_pos = self.relative(pos)
+                self.Claim_input()
+            return
 
     def LMB_up(self, pos):
         if any(self.dragable):
             self.Set_cursor_pos(pos)
-        if self.mode == "hold":
-            if self.value:
+        if self.mode == "hold" and self.value:
+            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
                 self.value = False
-                self.clicked = True
                 self.Release_lock()
-                self.root._Call("Release")
         return
 
     def Set_cursor_pos(self, pos):
@@ -155,7 +152,10 @@ class Button(Buttons):
                 self.left = self.Clamp(left, self.limits[0], self.limits[1] - self.width)
                 self.top = self.Clamp(top, self.limits[2], self.limits[3] - self.height)
                 if self.topleft != topleft: #If the Button moved:
-                    self.root._Call("Move")
+                    with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                        self._Call("Move")
+                        if Buttons._update_flags:
+                            self.moved = True
 
 
     def Scale(self, scale, relative_scale = True, *, center = (0, 0), px_center = None):
@@ -169,7 +169,6 @@ class Button(Buttons):
     def Clear(self):
         self.value = 0 if self.mode.lower() == "count" else False
         self.Release_lock()
-        self.clicked
 
 
     def Draw(self, screen, pos = None):
@@ -221,7 +220,6 @@ class Button(Buttons):
     @property
     def text(self):
         return self.__text
-
     @text.setter
     def text(self, value):
         self.__text = str(value)
@@ -238,18 +236,31 @@ class Button(Buttons):
     @property
     def value(self):
         return self.__value
-
     @value.setter
     def value(self, value):
         self.__value = value
+        if value:
+            self._Call("Click")
+        else:
+            self._Call("Release")
         self.updated = True
+        if Buttons._update_flags:
+            self.clicked = True
 
     @property
     def clicked(self):
         clicked_ = self.__clicked
         self.__clicked = False
         return clicked_
-
     @clicked.setter
     def clicked(self, value):
         self.__clicked = value
+
+    @property
+    def moved(self):
+        moved = self.__moved
+        self.__moved = False
+        return moved
+    @moved.setter
+    def moved(self, value):
+        self.__moved = value

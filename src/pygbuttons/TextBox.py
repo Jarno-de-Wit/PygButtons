@@ -106,19 +106,19 @@ class TextBox(Buttons):
     def LMB_down(self, pos):
         if self.contains(pos):
             self.Claim_input()
-            if self.is_selected:
+            if self._is_selected:
                 pos = self.relative(pos)
                 #If there is any text: (Check required since for loop has to run at least once to not crash)
-                if self.text:
+                if self._text:
                     #Iterate over all letters, to find which letter was closest to
                     #the position at which the user clicked
-                    text_width = self.font.size(self.text)[0]
+                    text_width = self.font.size(self._text)[0]
                     if text_width < self.true_width - 2 * self.scaled(self.text_offset[0]):
                         pixel_offset = self.AlignX(text_width, self.true_width - 2 * self.scaled(self.text_offset[0]) - 1, self.text_align).left + self.scaled(self.text_offset[0])
                     else:
                         pixel_offset = - self.text_scroll + self.scaled(self.text_offset[0])
-                    for letter_nr, letter in enumerate(self.text):
-                        pixel_length = self.font.size(self.text[:letter_nr + 1])[0]
+                    for letter_nr, letter in enumerate(self._text):
+                        pixel_length = self.font.size(self._text[:letter_nr + 1])[0]
                         if (pixel_length + pixel_offset) >= pos[0]:
                             break
                     #Calculate the horizontal distance from the cursor to the text box
@@ -136,10 +136,12 @@ class TextBox(Buttons):
                 else:
                     self.cursor = 0
             else:
-                self.is_selected = True
-                self.cursor = len(self.text)
-        elif self.is_selected:
-            self.is_selected = False
+                with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                    self._is_selected = True
+                self.cursor = len(self._text)
+        elif self._is_selected:
+            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                self._is_selected = False
             self.Buttons.input_processed = True
 
         return
@@ -147,19 +149,23 @@ class TextBox(Buttons):
 
     def Key_down(self, event):
         if event.key in (pygame.K_RETURN, pygame.K_ESCAPE):
-            self.is_selected = False
+            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                self._is_selected = False
         elif event.key == pygame.K_BACKSPACE:
-            self.text = self.text[:max(self.cursor - 1, 0)] + self.text[self.cursor:]
+            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                self._text = self._text[:max(self.cursor - 1, 0)] + self._text[self.cursor:]
             #Move the cursor back one item
             self.cursor -= 1
         elif event.key == pygame.K_DELETE:
-            self.text = self.text[:self.cursor] + self.text[self.cursor + 1:]
+            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                self._text = self._text[:self.cursor] + self._text[self.cursor + 1:]
         elif event.key == pygame.K_LEFT:
             self.cursor -= 1
         elif event.key == pygame.K_RIGHT:
             self.cursor += 1
         elif event.unicode:
-            self.text = self.text[:self.cursor] + event.unicode + self.text[self.cursor:]
+            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                self._text = self._text[:self.cursor] + event.unicode + self._text[self.cursor:]
             #Scroll the item sideways
             #self.text_scroll += self.font.size(event.unicode)[0]
             self.cursor += 1
@@ -167,9 +173,6 @@ class TextBox(Buttons):
             return
         #Inform Buttons that the input has been processed / used
         self.Buttons.input_processed = True
-        #Call "type" if the Key_down event was one which could have altered the text contents.
-        if event.key not in (pygame.K_RETURN, pygame.K_RIGHT, pygame.K_LEFT):
-            self.root._Call("Type")
         return
 
 
@@ -182,10 +185,9 @@ class TextBox(Buttons):
 
 
     def Clear(self):
-        self.value = ""
+        self.text = ""
         self.is_selected = False
         #Lock is automatically released in property setter
-        self.new_input
 
 
     def Draw(self, screen, pos = None):
@@ -196,7 +198,7 @@ class TextBox(Buttons):
         if self.updated:
             self.update_scroll()
             #Draw the correct background onto the surface
-            if not self.is_selected:
+            if not self._is_selected:
                 self.surface = self.Make_background_surface(self.bg)
             else:
                 self.surface = self.Make_background_surface(self.accent_bg)
@@ -204,7 +206,7 @@ class TextBox(Buttons):
             if self.border:
                 self.Draw_border(self.surface, *self.border)
             #Draw a accent border, if it is enabled:
-            if self.accent_border and self.is_selected:
+            if self.accent_border and self._is_selected:
                 self.Draw_border(self.surface, *self.accent_border)
             #Copy the surface to allow the cursor to be drawn
             self.cursor_surface = self.surface.copy()
@@ -212,8 +214,8 @@ class TextBox(Buttons):
             #Add the text to the surface
             text_limiter = pygame.Surface(self.offset(self.true_size, self.scaled(self.text_offset), (-2, -2)), pygame.SRCALPHA)
             limiter_rect = text_limiter.get_rect()
-            if self.text:
-                text_surface = self.font.render(self.text, True, self.text_colour)
+            if self._text:
+                text_surface = self.font.render(self._text, True, self.text_colour)
             else:
                 text_surface = self.font.render(self.hint, True, self.hint_colour)
             text_rect = text_surface.get_rect()
@@ -236,7 +238,7 @@ class TextBox(Buttons):
             #Align cursor vertically
             cursor_rect.centery = text_rect.centery
             #Align cursor horizontally. (if-else statement is required to prevent the hint from changing the Cursor location.)
-            cursor_rect.left = self.font.size(self.text[:self.cursor])[0] + (text_rect.left if self.text else self.AlignX(cursor_rect.width, limiter_rect, self.text_align).left)
+            cursor_rect.left = self.font.size(self._text[:self.cursor])[0] + (text_rect.left if self._text else self.AlignX(cursor_rect.width, limiter_rect, self.text_align).left)
             #Draw the cursor to the text limiter
             pygame.draw.rect(text_limiter, self.text_colour,  cursor_rect)
             self.cursor_surface.blit(text_limiter, limiter_rect)
@@ -244,7 +246,7 @@ class TextBox(Buttons):
             #Clear self.updated again, as the surface has been remade.
             self.updated = False
 
-        if self.is_selected:
+        if self._is_selected:
             #Update the cursor animation
             self.cursor_animation = (self.cursor_animation + 1) % self.framerate
         if self.cursor_animation < round(self.framerate / 2):
@@ -253,26 +255,35 @@ class TextBox(Buttons):
             screen.blit(self.surface, pos)
         return
 
-
     @property
     def is_selected(self):
-        return self.__is_selected
-
+        return self._is_selected
     @is_selected.setter
     def is_selected(self, value):
+        with Buttons.Callbacks(False, False), Buttons.Update_flags(False, False):
+            self._is_selected = value
+
+    @property
+    def _is_selected(self):
+        return self.__is_selected
+    @_is_selected.setter
+    def _is_selected(self, value):
         #If the user selects the text box:
         if value:
             self.__is_selected = True
-            self.cursor = len(self.text)
+            self.cursor = len(self._text)
             self.Set_lock()
-            self.root._Call("Select")
+            self._Call("Select")
+            if self._update_flags:
+                self.selected = True
         else:
             self.__is_selected = False
-            self.deselected = True
             self.cursor = 0
             self.cursor_animation = self.framerate
             self.Release_lock(False) #Release without claiming the input
-            self.root._Call("Deselect")
+            self._Call("Deselect")
+            if self._update_flags:
+                self.deselected = True
 
 
     @property
@@ -293,7 +304,7 @@ class TextBox(Buttons):
     @cursor.setter
     def cursor(self, value):
         #Make sure the cursor cannot be set to negative points, nor can it go further than directly after the last character.
-        self.__cursor = self.Clamp(int(value), 0, len(self.text))
+        self.__cursor = self.Clamp(int(value), 0, len(self._text))
         self.cursor_animation = self.framerate - 1
         self.updated = True
         self.update_scroll()
@@ -320,13 +331,22 @@ class TextBox(Buttons):
 
     @property
     def text(self):
-        return self.__value
-
+        return self._text
     @text.setter
     def text(self, value):
+        with Buttons.Callbacks(False, False), Buttons.Update_flags(False, False):
+            self._text = value
+
+    @property
+    def _text(self):
+        return self.__value
+    @_text.setter
+    def _text(self, value):
         self.__value = value
         self.updated = True
-        self.new_input = True
+        self._Call("Type")
+        if self._update_flags:
+            self.new_input = True
 
 
     @property
@@ -335,9 +355,7 @@ class TextBox(Buttons):
 
     @value.setter
     def value(self, val):
-        self.__value = val
-        self.updated = True
-        self.new_input = True
+        self.text = val
 
 
     @property
@@ -357,11 +375,11 @@ class TextBox(Buttons):
         """
         #Get the width of the text box; +1 to account for a possible cursor at the end.
         #Always add this +1, to prevent annoying 1-pixel shifts when moving the cursor to the final position.
-        text_width = self.font.size(self.text)[0] + 1
+        text_width = self.font.size(self._text)[0] + 1
         #Get the width of the text limiter surface
         limiter_width = self.true_width - self.scaled(2 * self.text_offset[0])
         #Get the cursor pixel index; +1 not required since 'size' already includes index 0 as width 1
-        cursor_pos = self.font.size(self.text[:self.cursor])[0]
+        cursor_pos = self.font.size(self._text[:self.cursor])[0]
         #If all text fits in the view window:
         if text_width <= limiter_width:
             #Reset any scroll. No need to scroll if it fits anyway

@@ -49,6 +49,10 @@ class Buttons():
     input_lock = None #Either None, or the currently selected button. Used to give the currently selected button input priority.
     input_claim = False #Set to True if a button has claimed the input, to prevent an input from affecting multiple buttons.
     input_processed = False
+    #Flags determining whether callbacks should be made and update_flags should be set.
+    #Can be set using Buttons.Callbacks() and Buttons.Update_flags()
+    _callbacks = False
+    _update_flags = False
     list_all = [] #A list containing all buttons, except those marked as independent. Can be used for debugging, or just to keep a nice list of all buttons.
     groups = {} #Groups to be used for getting certain buttons.
     scroll_factor = 1 #A factor to multiply scrolling with. Should be set based on the target DPI / resolution of the program
@@ -753,13 +757,90 @@ class Buttons():
         """
         Calls a function, if it exists, for the action specified
         """
-        if not action in self.functions: #If no function was specified for this action, ignore the fact that this function was called anyway
+        if not Buttons._callbacks:
             return
-        if isinstance(self.functions[action], (tuple, list)):
-            self.functions[action][0](*(arg if arg != "*self*" else self for arg in self.functions[action][1:]))
+        root = self.root #Transfer the function call over to the Buttons' root
+        if not action in root.functions: #If no function was specified for this action, ignore the fact that this function was called anyway
+            return
+        if isinstance(root.functions[action], (tuple, list)):
+            root.functions[action][0](*(arg if arg != "*self*" else root for arg in root.functions[action][1:]))
         else:
-            self.functions[action]()
+            root.functions[action]()
         return
+
+    class Callbacks:
+        """
+        Whether Buttons should trigger function callbacks on events
+
+        value: Whether function calls should be enabled. Can be any of:
+            True / Truthy - All state changes trigger function calls.
+            False / Falsy (except None) - No functions are called, regardless of the originator.
+            None (Default behavior): Disables enforcement, meaning only event based changes trigger functions.
+
+        enforce: Whether the rule should be enforced for all nested statements. Note: nested statements with enforce = True will still overwrite this.
+        """
+        suppressor = None #A reference to the currently enforcing flag
+        def __init__(self, value, enforce = True, /):
+            #Store the initial value and suppressor to set them back upon __exit__ (if called)
+            self.__prev_value = Buttons._callbacks
+            self.__prev_suppressor = Buttons.Callbacks.suppressor
+            #Clearing the flag (set to default)
+            if value is None:
+                Buttons.Callbacks.suppressor = None
+                Buttons._callbacks = False #False by default, unless set to true by events' with statement
+            #Setting the flag as enforcer
+            elif enforce:
+                Buttons._callbacks = value
+                Buttons.Callbacks.suppressor = self
+            #Setting the flag, without becoming the enforcer
+            elif Buttons.Callbacks.suppressor is None:
+                Buttons._callbacks = value
+            #else: Do nothing. This instance is not enforcing, and a pre-existing instance is, so that one takes precedence.
+        def __enter__(self):
+            #Don't do anything inside __enter__(). All actions are already done in __init__().
+            pass
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            if self is Buttons.Callbacks.suppressor or Buttons.Callbacks.suppressor is None:
+                Buttons._callbacks = self.__prev_value
+                #Remove self as the suppressor, since we exit the scope of this with value
+                Buttons.Callbacks.suppressor = self.__prev_suppressor
+
+
+    class Update_flags:
+        """
+        Whether Buttons should update the event flags
+
+        value: Whether event flag updates should be enabled. Can be any of:
+            True / Truthy - All state changes trigger function calls.
+            False / Falsy (except None) - No functions are called, regardless of the originator.
+            None (Default behavior): Disables enforcement, meaning only event based changes trigger functions.
+
+        enforce: Whether the rule should be enforced for all nested statements. Note: nested statements with enforce = True will still overwrite this.
+        """
+        suppressor = None #A reference to the currently enforcing flag
+        def __init__(self, value, enforce = True, /):
+            self.__prev_value = Buttons._update_flags
+            self.__prev_suppressor = Buttons.Update_flags.suppressor
+            #Clearing the flag (set to default)
+            if value is None:
+                Buttons.Update_flags.suppressor = None
+                Buttons._update_flags = False #False by default, unless set to true by events' with statement
+            #Setting the flag as enforcer
+            elif enforce:
+                Buttons._update_flags = value
+                Buttons.Update_flags.suppressor = self
+            #Setting the flag, without becoming the enforcer
+            elif Buttons.Update_flags.suppressor is None:
+                Buttons._update_flags = value
+            #else: Do nothing. This instance is not enforcing, and a pre-existing instance is, so that one takes precedence.
+        def __enter__(self):
+            #Don't do anything inside __enter__(). All actions are already done in __init__().
+            pass
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            if self is Buttons.Update_flags.suppressor or Buttons.Update_flags.suppressor is None:
+                Buttons._update_flags = self.__prev_value
+                #Remove self as the suppressor, since we exit the scope of this with value
+                Buttons.Update_flags.suppressor = self.__prev_suppressor
 
 
     @property
