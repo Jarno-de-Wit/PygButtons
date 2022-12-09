@@ -11,7 +11,7 @@ A module made to help create a UI in pygame by simplifying the creation and hand
 To install, run: `pip install pygbuttons`
 
 ## Dependencies
-- Python => 3.6
+- Python => 3.8
 - Pygame => 2.0.1
 
 ## Usage
