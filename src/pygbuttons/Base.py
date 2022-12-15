@@ -770,10 +770,11 @@ class Buttons():
         root = self.root #Transfer the function call over to the Buttons' root
         if not action in root.functions: #If no function was specified for this action, ignore the fact that this function was called anyway
             return
-        if isinstance(root.functions[action], (tuple, list)):
-            root.functions[action][0](*(arg if arg != "*self*" else root for arg in root.functions[action][1:]))
-        else:
-            root.functions[action]()
+        with Buttons.Callbacks(False, False), Buttons.Update_flags(False, False):
+            if isinstance(root.functions[action], (tuple, list)):
+                root.functions[action][0](*(arg if arg != "*self*" else root for arg in root.functions[action][1:]))
+            else:
+                root.functions[action]()
         return
 
     class Callbacks:
