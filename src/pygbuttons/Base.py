@@ -1,6 +1,7 @@
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
 import pygame
+from functools import lru_cache
 
 import math
 
@@ -751,15 +752,20 @@ class Buttons():
         """
         Re-builds a font object based on self.font_name and self.font_size, as well as the current self.scale.
         """
+        self.__font = self.__get_font(self.font_name, round(self.scale * self.font_size))
+        return
+
+    @staticmethod
+    @lru_cache(10)
+    def __get_font(name, size):
         #pygame.font.Font is used in favor of pygame.font.SysFont, as SysFont's font sizes are inconsistent with the value given for the font.
         try:
-            self.__font = pygame.font.Font(self.font_name, round(self.scale * self.font_size))
+            return pygame.font.Font(name, size)
         except FileNotFoundError:
-            font = pygame.font.match_font(self.font_name)
+            font = pygame.font.match_font(name)
             if font is None: #If no matching font was found
-                raise FileNotFoundError(f"No such font: '{self.font_name}'")
-            self.__font = pygame.font.Font(font, round(self.scale * self.font_size))
-
+                raise FileNotFoundError(f"No such font: '{name}'")
+            return pygame.font.Font(font, size)
 
     def _Call(self, action):
         """
