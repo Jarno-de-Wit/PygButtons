@@ -45,7 +45,7 @@ class Button(Buttons):
     *.clicked: bool - Whether the Button has been set to a new state since the last time this variable was checked. Automatically resets once it is querried.
     *.moved: bool - Whether the Button has been dragged to a different location since the last time this variable was checked. Automatically resets once it is querried.
     """
-    actions = ["LMB_down", "LMB_up", "RMB_down", "Set_cursor_pos"]
+    actions = ["LMB_down", "LMB_up", "Set_cursor_pos"]
     def __init__(self, pos, size,
                  text = "",
                  mode = "None",
