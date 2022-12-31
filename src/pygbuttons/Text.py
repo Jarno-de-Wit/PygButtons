@@ -223,7 +223,7 @@ class Text(Buttons):
             with Buttons.Callbacks(False, True):
                 self.scroll_bar.value = value
         self._Call("Move")
-        if self._update_flags:
+        if Buttons._update_flags:
             self.moved = True
 
         return

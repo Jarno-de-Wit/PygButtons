@@ -274,7 +274,7 @@ class TextBox(Buttons):
             self.cursor = len(self._text)
             self.Set_lock()
             self._Call("Select")
-            if self._update_flags:
+            if Buttons._update_flags:
                 self.selected = True
         else:
             self.__is_selected = False
@@ -282,7 +282,7 @@ class TextBox(Buttons):
             self.cursor_animation = self.framerate
             self.Release_lock(False) #Release without claiming the input
             self._Call("Deselect")
-            if self._update_flags:
+            if Buttons._update_flags:
                 self.deselected = True
 
 
@@ -345,7 +345,7 @@ class TextBox(Buttons):
         self.__value = value
         self.updated = True
         self._Call("Type")
-        if self._update_flags:
+        if Buttons._update_flags:
             self.new_input = True
 
 
