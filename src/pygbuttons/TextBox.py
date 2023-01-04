@@ -143,7 +143,7 @@ class TextBox(ButtonBase):
         elif self._is_selected:
             with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
                 self._is_selected = False
-            self.Buttons.input_processed = True
+            Buttons.input_processed = True
 
         return
 
@@ -173,7 +173,7 @@ class TextBox(ButtonBase):
         else:
             return
         #Inform Buttons that the input has been processed / used
-        self.Buttons.input_processed = True
+        Buttons.input_processed = True
         return
 
 
@@ -275,7 +275,7 @@ class TextBox(ButtonBase):
             self.cursor = len(self._text)
             self.Set_lock()
             self._Call("Select")
-            if Buttons._update_flags:
+            if self._update_flags:
                 self.selected = True
         else:
             self.__is_selected = False
@@ -283,7 +283,7 @@ class TextBox(ButtonBase):
             self.cursor_animation = self.framerate
             self.Release_lock(False) #Release without claiming the input
             self._Call("Deselect")
-            if Buttons._update_flags:
+            if self._update_flags:
                 self.deselected = True
 
 
@@ -346,7 +346,7 @@ class TextBox(ButtonBase):
         self.__value = value
         self.updated = True
         self._Call("Type")
-        if Buttons._update_flags:
+        if self._update_flags:
             self.new_input = True
 
 

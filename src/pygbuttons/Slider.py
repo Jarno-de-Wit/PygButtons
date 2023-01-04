@@ -95,7 +95,7 @@ class Slider(ButtonBase):
             self.orientation = int(self.width < self.height)
         self.style = style
         #Set the background parameters for the Slider
-        self.bg = self.Buttons.Verify_background(background)
+        self.bg = self.Verify_background(background)
         self.border = self.Verify_border(border)
 
         #Initialise any markers - Has to be done before making the slider object
@@ -126,7 +126,7 @@ class Slider(ButtonBase):
             self._moved = True #Instruct the button that value is no longer equal to the value stored in __value
             with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
                 self.is_selected = True
-                if Buttons._update_flags:
+                if self._update_flags:
                     self.moved = True
         elif self.contains(pos):
             #Move the slider to where we clicked (within limits of course)
@@ -135,7 +135,7 @@ class Slider(ButtonBase):
             self.Set_lock()
             with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
                 self.is_selected = True
-                if Buttons._update_flags:
+                if self._update_flags:
                     self.moved = True
 
     def LMB_up(self, pos):
@@ -151,7 +151,7 @@ class Slider(ButtonBase):
             if self.slider.topleft != slider_pos:
                 self._moved = True
                 with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
-                    if Buttons._update_flags:
+                    if self._update_flags:
                         self.moved = True
 
 
@@ -285,12 +285,12 @@ class Slider(ButtonBase):
         if value: #If the user selects the text box:
             self.__is_selected = True
             self.Set_lock()
-            if Buttons._update_flags:
+            if self._update_flags:
                 self.clicked = True
         else: #If the user deselects the box:
             self.__is_selected = False
             self.Release_lock()
-            if Buttons._update_flags:
+            if self._update_flags:
                 self.clicked = True
 
     @property
@@ -316,7 +316,7 @@ class Slider(ButtonBase):
         self.__value = val
         self._moved = False
         self._Call("Move")
-        if Buttons._update_flags:
+        if self._update_flags:
             self.moved = True
 
 

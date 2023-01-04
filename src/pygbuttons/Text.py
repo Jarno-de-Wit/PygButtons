@@ -98,7 +98,7 @@ class Text(ButtonBase):
             #Force flags to True, since flags are used internally to check for movement
             with Buttons.Update_flags(True, True):
                 self.scroll_bar.LMB_down(pos)
-            if self.Buttons.input_claim: #If the slider contained the position, and now claimed the input, set self as the lock
+            if Buttons.input_claim: #If the slider contained the position, and now claimed the input, set self as the lock
                 self.Set_lock()
 
 
@@ -106,7 +106,7 @@ class Text(ButtonBase):
         if self.scroll_bar:
             with Buttons.Update_flags(True, True):
                 self.scroll_bar.LMB_up(pos)
-            if self.Buttons.input_claim:
+            if Buttons.input_claim:
                 self.Release_lock()
 
 
@@ -120,7 +120,7 @@ class Text(ButtonBase):
         if not self.contains(pos): #If the mouse was not within the text box:
             return
         with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
-            self.scrolled_px += self.Buttons.scroll_factor * value
+            self.scrolled_px += Buttons.scroll_factor * value
         self.Claim_input()
 
 
@@ -224,7 +224,7 @@ class Text(ButtonBase):
             with Buttons.Callbacks(False, True):
                 self.scroll_bar.value = value
         self._Call("Move")
-        if Buttons._update_flags:
+        if self._update_flags:
             self.moved = True
 
         return

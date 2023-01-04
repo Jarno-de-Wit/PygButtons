@@ -32,6 +32,7 @@ class ButtonBase():
     #Can be set using Buttons.Callbacks() and Buttons.Update_flags()
     _callbacks = False
     _update_flags = False
+
     min_scale = 0.05
     max_scale = 5
 
@@ -51,9 +52,8 @@ class ButtonBase():
         self.Add_to_group(groups)
         self.root = self if root is None else root
         if not independent:
-            self.Buttons.list_all.append(self)
+            Buttons.list_all.append(self)
         self.independent = independent
-
 
     def __str__(self):
         return f"{type(self).__name__} object"
@@ -72,13 +72,13 @@ class ButtonBase():
             if grp is None:
                 continue
             #Store the button in the global groups dict
-            if grp in self.Buttons.groups:
+            if grp in Buttons.groups:
                 #If the group exists, add self to the group, unless self is already in this group.
-                if not self in self.Buttons.groups[grp]:
-                    self.Buttons.groups[grp].append(self)
+                if not self in Buttons.groups[grp]:
+                    Buttons.groups[grp].append(self)
             #If the group doesn't exist, make a new group with self as the first list entry.
             else:
-                self.Buttons.groups[grp] = [self]
+                Buttons.groups[grp] = [self]
 
             #Track the joined groups in the buttons' own groups list
             if grp not in self.groups:
@@ -89,27 +89,27 @@ class ButtonBase():
         Set the input lock (if possible).
         If claim = True, automatically set Buttons.input_claim as well.
         """
-        self.Buttons.input_processed = True
-        if not self.Buttons.input_lock and not self.independent:
-            self.Buttons.input_lock = self
+        Buttons.input_processed = True
+        if not Buttons._input_lock and not self.independent:
+            Buttons._input_lock = self
         if claim:
-            self.Buttons.input_claim = True
+            Buttons.input_claim = True
 
     def Release_lock(self, claim = True):
         """
         Release the input lock (if necessary / possible).
         If claim = True, automatically set Buttons.input_claim as well.
         """
-        self.Buttons.input_processed = False
-        if self is self.Buttons.input_lock and not self.independent:
-            self.Buttons.input_lock = None
+        Buttons.input_processed = True
+        if self is Buttons._input_lock and not self.independent:
+            Buttons._input_lock = None
         if claim:
-            self.Buttons.input_claim = True
+            Buttons.input_claim = True
 
     @classmethod
     def Claim_input(cls):
-        cls.Buttons.input_claim = True
-        cls.Buttons.input_processed = True
+        Buttons.input_claim = True
+        Buttons.input_processed = True
 
 
     @classmethod
@@ -473,7 +473,7 @@ class ButtonBase():
         """
         Calls a function, if it exists, for the action specified
         """
-        if not Buttons._callbacks:
+        if not self._callbacks:
             return
         root = self.root #Transfer the function call over to the Buttons' root
         if not action in root.functions: #If no function was specified for this action, ignore the fact that this function was called anyway
@@ -708,8 +708,3 @@ class ButtonBase():
 
     def relative(self, pos):
         return self.offset(pos, self.scaled(self.topleft, False), (-1, -1))
-
-
-#Add an attribute to this class that references itself, so other subclasses can easily acces the parent class object
-#This is useful for allowing communications between subclasses
-Buttons.Buttons = Buttons

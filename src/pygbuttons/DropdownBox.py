@@ -182,7 +182,7 @@ class DropdownBox(ButtonBase):
             if self.contains(pos):
                 pass
             elif self.is_within(pos, (self.scaled(self.left), self.scaled(self.bottom) + self.scaled(self.spacing[1])), (self.scaled(self.right), self.scaled(self.bottom) + self.scaled(self.spacing[1]) + self._true_pixel_length)): #If the position lies withing the expanded section, perform scrolling.
-                self.scrolled_px += self.Buttons.scroll_factor * value
+                self.scrolled_px += Buttons.scroll_factor * value
                 self.Claim_input()
 
 
@@ -440,7 +440,7 @@ class DropdownBox(ButtonBase):
         self.updated = True
         self._moved = True
         self._Call("Update")
-        if Buttons._update_flags:
+        if self._update_flags:
             self.new_state = True
 
 
@@ -515,7 +515,7 @@ class DropdownBox(ButtonBase):
             self.Release_lock(False)
             self._Call("Deselect")
         self.updated = True
-        if Buttons._update_flags:
+        if self._update_flags:
             self.clicked = True
 
 

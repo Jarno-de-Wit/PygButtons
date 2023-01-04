@@ -106,7 +106,7 @@ class Button(ButtonBase):
             with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
                 if self.mode == "none":
                     self._Call("Click") #Call "Click" separately since "none" does not change self.value
-                    if Buttons._update_flags:
+                    if self._update_flags:
                         self.clicked = True
                 elif self.mode == "count":
                     self.value += 1
@@ -155,7 +155,7 @@ class Button(ButtonBase):
                 if self.topleft != topleft: #If the Button moved:
                     with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
                         self._Call("Move")
-                        if Buttons._update_flags:
+                        if self._update_flags:
                             self.moved = True
 
 
@@ -245,7 +245,7 @@ class Button(ButtonBase):
         else:
             self._Call("Release")
         self.updated = True
-        if Buttons._update_flags:
+        if self._update_flags:
             self.clicked = True
 
     @property
