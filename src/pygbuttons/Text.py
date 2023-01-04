@@ -1,4 +1,5 @@
-from .Base import Buttons
+from .Base import ButtonBase
+from .Control import Buttons
 from .Slider import Slider
 
 import os
@@ -7,7 +8,7 @@ import pygame
 import math
 
 
-class Text(Buttons):
+class Text(ButtonBase):
     """
     A simple (multi-line) text object, with scrolling support.
 

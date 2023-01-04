@@ -3,13 +3,15 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
 import pygame
 from functools import lru_cache
 
+from .Control import Buttons
+
 import math
 
 pygame.font.init() #Required to set a font
 
 
 
-class Buttons():
+class ButtonBase():
     """
     A class to serve as a base for all Button classes. Also provides interfaces for button-to-button "communication" (e.g. claiming a cursor lock)
 

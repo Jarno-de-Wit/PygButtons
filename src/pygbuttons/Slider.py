@@ -1,4 +1,5 @@
-from .Base import Buttons
+from .Base import ButtonBase
+from .Control import Buttons
 from .Button import Button
 
 import os
@@ -6,7 +7,7 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
 import pygame
 
 
-class Slider(Buttons):
+class Slider(ButtonBase):
     """
     Creates a Slider, which allows the user to input a value within a given range.
 

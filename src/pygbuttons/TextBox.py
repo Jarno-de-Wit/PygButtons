@@ -1,11 +1,12 @@
-from .Base import Buttons
+from .Base import ButtonBase
+from .Control import Buttons
 
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
 import pygame
 
 
-class TextBox(Buttons):
+class TextBox(ButtonBase):
     """
     Creates a TextBox, in which a user can input text.
 

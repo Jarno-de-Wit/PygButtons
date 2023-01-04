@@ -1,4 +1,5 @@
-from .Base import Buttons
+from .Base import ButtonBase
+from .Control import Buttons
 from .Button  import Button
 from .Slider import Slider
 
@@ -7,7 +8,7 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
 import pygame
 
 
-class DropdownBox(Buttons):
+class DropdownBox(ButtonBase):
     """
     Creates a DropdownBox, in which a user can select an input from a list of options.
 

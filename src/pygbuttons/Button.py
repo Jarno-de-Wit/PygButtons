@@ -1,4 +1,5 @@
-from .Base import Buttons
+from .Base import ButtonBase
+from .Control import Buttons
 
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
@@ -6,7 +7,7 @@ import pygame
 import math
 
 
-class Button(Buttons):
+class Button(ButtonBase):
     """
     Creates a Button, an object which can detect Left Mouse Button inputs from the user.
 
