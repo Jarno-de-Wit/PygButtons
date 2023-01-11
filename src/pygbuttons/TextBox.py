@@ -219,9 +219,8 @@ class TextBox(ButtonBase):
                 text_surface = self.font.render(self._text, True, self.text_colour)
             else:
                 text_surface = self.font.render(self.hint, True, self.hint_colour)
-            text_rect = text_surface.get_rect()
             #Align the text rect
-            text_rect = self.AlignY(text_rect, limiter_rect, self.text_align)
+            text_rect = self.AlignY(self.font.get_height(), limiter_rect, self.text_align)
             if text_rect.width < limiter_rect.width:
                 #If the text is smaller than the limiter, perform alignment in the X direction
                 #Available width -= 1 to account for the cursor potentially being on the right side of the text
