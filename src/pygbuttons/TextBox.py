@@ -248,8 +248,8 @@ class TextBox(ButtonBase):
 
         if self._is_selected:
             #Update the cursor animation
-            self.cursor_animation = (self.cursor_animation + 1) % self.framerate
-        if self.cursor_animation < round(self.framerate / 2):
+            self.cursor_animation = (self.cursor_animation + 1) % Buttons.framerate
+        if self.cursor_animation < round(Buttons.framerate / 2):
             screen.blit(self.cursor_surface, pos)
         else:
             screen.blit(self.surface, pos)
@@ -279,7 +279,7 @@ class TextBox(ButtonBase):
         else:
             self.__is_selected = False
             self.cursor = 0
-            self.cursor_animation = self.framerate
+            self.cursor_animation = Buttons.framerate
             self.Release_lock(False) #Release without claiming the input
             self._Call("Deselect")
             if self._update_flags:
@@ -305,7 +305,7 @@ class TextBox(ButtonBase):
     def cursor(self, value):
         #Make sure the cursor cannot be set to negative points, nor can it go further than directly after the last character.
         self.__cursor = self.Clamp(int(value), 0, len(self._text))
-        self.cursor_animation = self.framerate - 1
+        self.cursor_animation = Buttons.framerate - 1
         self.updated = True
         self.update_scroll()
 
