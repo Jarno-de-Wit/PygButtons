@@ -58,7 +58,10 @@ class ButtonBase():
     def __str__(self):
         return f"{type(self).__name__} object"
     def __repr__(self):
-        return f"<{self.__str__()} at {self.topleft}>"
+        try:
+            return f"<{self.__str__()} at {self.topleft}>"
+        except AttributeError:
+            return f"Partially initialised <{self.__str__()}>"
 
 
     def Add_to_group(self, groups):
