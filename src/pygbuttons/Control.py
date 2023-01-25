@@ -183,7 +183,7 @@ class Buttons():
                 button.LMB_up(pos)
                 if cls.input_claim:
                     return
-        return
+
 
     @classmethod
     def RMB_down(cls, pos, group = all):
@@ -407,15 +407,6 @@ class Buttons():
             return output
         else: #Otherwise, the iterator was too long. Raise an error.
             raise ValueError("Given iterable contains too many items")
-
-    @staticmethod
-    def offset(pos, offset_vector, scalar_vector = (1, 1)):
-        """
-        Returns a position with a certain offset.
-        Also allows the offset to be multiplied by a scalar vector.
-        """
-        return tuple(pos[i] + offset_vector[i] * scalar_vector[i] for i in range(len(pos)))
-
 
 
     class Callbacks:
