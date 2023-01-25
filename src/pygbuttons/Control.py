@@ -123,7 +123,6 @@ class Buttons():
                 return
                 cls.MMB_up(event.pos, group)
             elif event.button == 3:
-                return
                 cls.RMB_up(event.pos, group)
         elif event.type == pygame.KEYDOWN:
             cls.Key_down(event, group)
@@ -206,6 +205,30 @@ class Buttons():
                 button.RMB_down(pos)
                 if cls.input_claim:
                     return
+
+
+    @classmethod
+    def RMB_up(cls, pos, group = all):
+        """
+        Right Mouse Button up.
+        """
+        cls.input_claim = False
+        cls.input_processed = False
+        group_list = cls.get_group(group)
+
+        #If a button has claimed an input lock
+        if cls._input_lock in group_list:
+            if "RMB_up" in cls._input_lock.actions:
+                cls._input_lock.RMB_up(pos)
+                if cls.input_claim:
+                    return
+
+        for button in group_list:
+            if "RMB_up" in button.actions and button is not cls._input_lock:
+                button.RMB_up(pos)
+                if cls.input_claim:
+                    return
+
 
     @classmethod
     def Scroll(cls, value, pos, group):
