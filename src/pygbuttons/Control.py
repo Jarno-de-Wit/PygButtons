@@ -110,7 +110,6 @@ class Buttons():
             if event.button == 1:
                 cls.LMB_down(event.pos, group)
             elif event.button == 2:
-                return
                 cls.MMB_down(event.pos, group)
             elif event.button == 3:
                 cls.RMB_down(event.pos, group)
@@ -120,7 +119,6 @@ class Buttons():
             if event.button == 1:
                 cls.LMB_up(event.pos, group)
             elif event.button == 2:
-                return
                 cls.MMB_up(event.pos, group)
             elif event.button == 3:
                 cls.RMB_up(event.pos, group)
@@ -226,6 +224,52 @@ class Buttons():
         for button in group_list:
             if "RMB_up" in button.actions and button is not cls._input_lock:
                 button.RMB_up(pos)
+                if cls.input_claim:
+                    return
+
+
+    @classmethod
+    def MMB_down(cls, pos, group = all):
+        """
+        Middle Mouse Button down.
+        """
+        cls.input_claim = False
+        cls.input_processed = False
+        group_list = cls.get_group(group)
+
+        #If a button has claimed an input lock
+        if cls._input_lock in group_list:
+            if "MMB_down" in cls._input_lock.actions:
+                cls._input_lock.MMB_down(pos)
+                if cls.input_claim:
+                    return
+
+        for button in group_list:
+            if "MMB_down" in button.actions and button is not cls._input_lock:
+                button.MMB_down(pos)
+                if cls.input_claim:
+                    return
+
+
+    @classmethod
+    def MMB_up(cls, pos, group = all):
+        """
+        Middle Mouse Button up.
+        """
+        cls.input_claim = False
+        cls.input_processed = False
+        group_list = cls.get_group(group)
+
+        #If a button has claimed an input lock
+        if cls._input_lock in group_list:
+            if "MMB_up" in cls._input_lock.actions:
+                cls._input_lock.MMB_up(pos)
+                if cls.input_claim:
+                    return
+
+        for button in group_list:
+            if "MMB_up" in button.actions and button is not cls._input_lock:
+                button.MMB_up(pos)
                 if cls.input_claim:
                     return
 
