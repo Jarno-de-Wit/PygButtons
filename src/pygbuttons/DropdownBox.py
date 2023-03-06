@@ -54,7 +54,7 @@ class DropdownBox(ButtonBase):
     *.is_selected: bool - Whether this DropdownBox object is selected at this point in time. I.E. Whether DropdownBox is expanded.
     *.clicked: bool - Whether the DropdownBox has been clicked anywhere (except the scroll bar), thus changing from selected to deselected (or vice versa).
     """
-    actions = ["LMB_down", "LMB_up", "Set_cursor_pos", "Scroll"]
+    actions = ["LMB_down", "LMB_up", "Set_cursor_pos", "Scroll", "Mouse_motion"]
     def __init__(self, pos, size,
                  options = [],
                  hint = "",
@@ -170,6 +170,11 @@ class DropdownBox(ButtonBase):
         if self.is_selected and self.scroll_bar:
             with Buttons.Update_flags(True, True):
                 self.scroll_bar.LMB_up(pos)
+
+    def Mouse_motion(self, pos):
+        if self.is_selected and self.scroll_bar:
+            with Buttons.Update_flags(True, True):
+                self.scroll_bar.Mouse_motion(pos)
 
     def Set_cursor_pos(self, pos):
         if self.is_selected and self.scroll_bar:

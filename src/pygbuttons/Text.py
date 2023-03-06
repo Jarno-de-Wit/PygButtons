@@ -41,7 +41,7 @@ class Text(ButtonBase):
     *.text: str - The current text being rendered to the surface.
     *.lines: tuple - The current text being rendered to the surface, as it is split to prevent it from exceeding the Surface borders.
     """
-    actions = ["Scroll", "LMB_down", "LMB_up", "Set_cursor_pos"]
+    actions = ["Scroll", "LMB_down", "LMB_up", "Set_cursor_pos", "Mouse_motion"]
     def __init__(self, pos, size,
                  text = "",
                  style = "Square",
@@ -108,6 +108,12 @@ class Text(ButtonBase):
                 self.scroll_bar.LMB_up(pos)
             if Buttons.input_claim:
                 self.Release_lock()
+
+
+    def Mouse_motion(self, pos):
+        if self.scroll_bar:
+            with Buttons.Update_flags(True, True):
+                self.scroll_bar.Mouse_motion(pos)
 
 
     def Set_cursor_pos(self, pos):

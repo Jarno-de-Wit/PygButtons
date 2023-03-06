@@ -46,7 +46,7 @@ class Button(ButtonBase):
     *.clicked: bool - Whether the Button has been set to a new state since the last time this variable was checked. Automatically resets once it is querried.
     *.moved: bool - Whether the Button has been dragged to a different location since the last time this variable was checked. Automatically resets once it is querried.
     """
-    actions = ["LMB_down", "LMB_up", "Set_cursor_pos"]
+    actions = ["LMB_down", "LMB_up", "Set_cursor_pos", "Mouse_motion"]
     def __init__(self, pos, size,
                  text = "",
                  mode = "None",
@@ -121,18 +121,26 @@ class Button(ButtonBase):
             return
 
     def LMB_up(self, pos):
-        if any(self.dragable):
-            self.Set_cursor_pos(pos)
         if self.mode == "hold" and self.value:
             with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
                 self.value = False
                 self.Release_lock()
         return
 
-    def Set_cursor_pos(self, pos):
+    def Mouse_motion(self, event):
+        """
+        If the button supports dragging, this function is used to move the button to a new position.
+
+        event: pygame.event.EventType, tuple - The event or global position the cursor moved to.
+        """
+        # If required, extract the position from the event
+        if isinstance(event, pygame.event.EventType):
+            pos = event.pos
+        else:
+            pos = event
+
         if self.value:
             if any(self.dragable):
-                topleft = self.topleft
                 hori, verti = self.offset(self.relative(pos), self.drag_pos, (-1, -1)) #Determine the offsets of the cursor from where the user originally clicked
 
                 left = self.left + hori / self.scale * self.dragable[0] #Scale the offsets down to the original scale
@@ -152,11 +160,14 @@ class Button(ButtonBase):
                 #Confine the button within the limits
                 self.left = self.Clamp(left, self.limits[0], self.limits[1] - self.width)
                 self.top = self.Clamp(top, self.limits[2], self.limits[3] - self.height)
-                if self.topleft != topleft: #If the Button moved:
-                    with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
-                        self._Call("Move")
-                        if self._update_flags:
-                            self.moved = True
+                with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                    self._Call("Move")
+                    if self._update_flags:
+                        self.moved = True
+
+    def Set_cursor_pos(self, pos):
+        return
+        self.Mouse_motion(pos)
 
 
     def Scale(self, scale, relative_scale = True, *, center = (0, 0), px_center = None):

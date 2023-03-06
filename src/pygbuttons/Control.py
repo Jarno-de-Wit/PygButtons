@@ -3,6 +3,7 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
 import pygame
 
 import math
+import sys
 
 pygame.font.init() #Required to set a font
 
@@ -27,12 +28,12 @@ class Buttons():
     Buttons.Callbacks(enabled [bool]) - Enables or disables function callbacks. Can be used in conjunction with "with" statements.
     Buttons.Update_flags(enabled [bool]) - Enables or disables the update flags for buttons. Can be used in conjuction with "with" statements.
 
-    Other Actions (automatically called by Buttons.Event() / Buttons.Update() when required):
+    Other Actions (automatically called by Buttons.Event() when required):
     Buttons.LMB_down(pos, group) - Perform a LMB_down (normal mouse click) at a certain position.
     Buttons.LMB_up(pos, group) - Perform a LMB_up (releasing a normal mouse click) at a certain position.
     Buttons.Scroll(value, pos, group) - Perform a Scrolling action at a certain position.
     Buttons.Key_down(event, group) - Perform a Key_down (typing) action.
-    Buttons.Set_cursor_pos(pos, group) - Update the cursor position.
+    Buttons.Mouse_motion(event or pos, group) - Update the cursor position.
 
     Available functions:
     Buttons.get_group(group) - Will return a list of all Buttons that are in the given group(s). Also used internally when getting all buttons for which an Action should be applied.
@@ -124,6 +125,8 @@ class Buttons():
                 cls.RMB_up(event.pos, group)
         elif event.type == pygame.KEYDOWN:
             cls.Key_down(event, group)
+        elif event.type == pygame.MOUSEMOTION:
+            cls.Mouse_motion(event, group)
 
 
     @classmethod
@@ -131,6 +134,9 @@ class Buttons():
         """
         A method that will run any updates that have to be performed each cycle, such as updating the cursor position for sliders.
         """
+        if not hasattr(cls, "depr_update"):
+            cls.depr_update = True
+            print(f"Update will be deprecated in the next version. All functionality has been taken over by the MOUSEMOTION event. It is safe to remove Update() as long as the MOUSEMOTION event is not filtered.", file = sys.stderr)
         if cls._input_lock:
             if "Set_cursor_pos" in cls._input_lock.actions:
                 cls.Set_cursor_pos(pygame.mouse.get_pos(), group)
@@ -309,12 +315,26 @@ class Buttons():
             if "Key_down" in cls._input_lock.actions:
                 cls._input_lock.Key_down(event)
 
+    @classmethod
+    def Mouse_motion(cls, event, group = all):
+        """
+        Updates the cursor position. Required for e.g. sliders.
+        Only active for the button which currently holds the _input_lock to prevent excessive function call overhead.
+        """
+        group_list = cls.get_group(group)
+        if cls._input_lock in group_list:
+            if "Mouse_motion" in cls._input_lock.actions:
+                cls._input_lock.Mouse_motion(event)
+
 
     @classmethod
     def Set_cursor_pos(cls, pos, group = all):
         """
         Updates the cursor position. Required for e.g. sliders.
         """
+        if not hasattr(cls, "depr_update"):
+            cls.depr_update = True
+            print(f"Set_cursor_pos will be deprecated in the next version. All functionality has been taken over by the MOUSEMOTION event. Please replace all direct calls to Buttons.Set_cursor_pos with Buttons.Mouse_motion.", file = sys.stderr)
         group_list = cls.get_group(group)
         if not cls._input_lock:
             for button in group_list:

@@ -50,7 +50,7 @@ class Slider(ButtonBase):
 
     *.is_selected: bool - Whether this Slider object is selected at this point in time. I.E. Whether the user is currently moving the Slider.
     """
-    actions = ["LMB_down", "LMB_up", "Set_cursor_pos"]
+    actions = ["LMB_down", "LMB_up", "Set_cursor_pos", "Mouse_motion"]
     def __init__(self, pos, size,
                  value_range = (0, 1),
                  start_value = 0,
@@ -131,7 +131,7 @@ class Slider(ButtonBase):
         elif self.contains(pos):
             #Move the slider to where we clicked (within limits of course)
             self.slider.LMB_down(self.slider.scaled(self.slider.center))
-            self.Set_cursor_pos(pos)
+            self.slider.Mouse_motion(pos)
             self.Set_lock()
             with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
                 self.is_selected = True
@@ -143,6 +143,16 @@ class Slider(ButtonBase):
             self.slider.LMB_up(pos)
             with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
                 self.is_selected = False
+
+    def Mouse_motion(self, event):
+        if self.is_selected:
+            slider_pos = self.slider.topleft
+            self.slider.Mouse_motion(event)
+            if self.slider.topleft != slider_pos:
+                self._moved = True
+                with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                    if self._update_flags:
+                        self.moved = True
 
     def Set_cursor_pos(self, pos):
         if self.is_selected:
