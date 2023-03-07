@@ -131,6 +131,7 @@ class Slider(ButtonBase):
         elif self.contains(pos):
             #Move the slider to where we clicked (within limits of course)
             self.slider.LMB_down(self.slider.scaled(self.slider.center))
+            self._moved = True
             self.slider.Mouse_motion(pos)
             self.Set_lock()
             with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
@@ -147,12 +148,11 @@ class Slider(ButtonBase):
     def Mouse_motion(self, event):
         if self.is_selected:
             slider_pos = self.slider.topleft
+            self._moved = True
             self.slider.Mouse_motion(event)
-            if self.slider.topleft != slider_pos:
-                self._moved = True
-                with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
-                    if self._update_flags:
-                        self.moved = True
+            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                if self._update_flags:
+                    self.moved = True
 
     def Set_cursor_pos(self, pos):
         if self.is_selected:
