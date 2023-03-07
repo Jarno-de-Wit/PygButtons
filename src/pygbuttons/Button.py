@@ -166,7 +166,6 @@ class Button(ButtonBase):
                         self.moved = True
 
     def Set_cursor_pos(self, pos):
-        return
         self.Mouse_motion(pos)
 
 

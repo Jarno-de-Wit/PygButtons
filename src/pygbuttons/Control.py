@@ -19,7 +19,6 @@ class Buttons():
 
     Available Actions - for more detailed information, see help(Buttons.*function_name*):
     Buttons.Event(pygame.Event, group) - Allows for a pygame.event to be processed completely autonomously, and be diverted to the correct buttons. No further intervention is required if this function is used.
-    Buttons.Update(group) - Updates all Buttons in the given group wherever necessary, such as updating the current cursor position for active sliders. Should be called once at the end of each input / event cycle.
     Buttons.Draw(screen, group) - Draw all Buttons in the given group(s) to the given screen / pygame.Surface
     Buttons.Scale(scale, group) - Scales all Buttons in the given group to / by the given factor.
     Buttons.Move(offset, group) - Moves all Buttons in the given group by the given offset.

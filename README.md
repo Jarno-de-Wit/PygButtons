@@ -22,9 +22,8 @@ To use the Buttons in a program, it is recommended to perform the following step
   3. Create the required Buttons
 - While running
   1. Pass all (relevant) Pygame.Events to the active Buttons in the input loop
-  2. Update the Buttons with information which is not event driven (e.g. cursor position)
-  3. Draw the Buttons to the active screen
-  4. Repeat
+  2. Draw the Buttons to the active screen
+  3. Repeat
 
 Getting an output from a Button can be done either by binding a function to the Button (which is then automatically executed when a certain action takes place), or by polling the Buttons value / status.
 

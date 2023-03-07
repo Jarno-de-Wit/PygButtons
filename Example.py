@@ -44,8 +44,6 @@ def Main():
         if button_count.clicked:
             button_count.text = str(button_count.value)
 
-        #Perform updates on the Buttons
-        Buttons.Update(all)
         Draw_screen(screen)
         #Let pygame's framerate limiter do its thing of limiting the framerate to the framerate we set
         clock.tick(framerate)
