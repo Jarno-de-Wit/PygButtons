@@ -268,11 +268,11 @@ class Slider(ButtonBase):
         """
         Set the sliders' primary dimension / size (in the direction of travel).
         Set_slider_primary(value).
-        If limit_size == True, the primary dimension cannot go below 1/2 the secondary dimension. This is to prevent the slider from disappearing completely if the primary is set too low.
+        If limit_size == True, the primary dimension cannot go below 1/2 the secondary dimension, nor above the Slider bars' primary dimension. This is to prevent the slider from disappearing completely if the primary is set too low.
         """
         if limit_size:
             #Make sure the slider primary can not accidentally be set too low.
-            value = max(value, round(self.rotated(self.slider.size)[1] / 2))
+            value = self.Clamp(value, round(self.rotated(self.slider.size)[1] / 2), self.rotated(self.size)[0])
         self.value #Flush any _moved arguments, in case they haven't been processed yet.
         if self.orientation % 2: #Update the sliders' size
             if self.slider.height != value:
