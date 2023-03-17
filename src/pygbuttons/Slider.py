@@ -271,8 +271,10 @@ class Slider(ButtonBase):
         If limit_size == True, the primary dimension cannot go below 1/2 the secondary dimension, nor above the Slider bars' primary dimension. This is to prevent the slider from disappearing completely if the primary is set too low.
         """
         if limit_size:
-            #Make sure the slider primary can not accidentally be set too low.
-            value = self.Clamp(value, round(self.rotated(self.slider.size)[1] / 2), self.rotated(self.size)[0])
+            #Make sure the slider primary can not accidentally be set too low or too high.
+            value = min(max(value, round(self.rotated(self.slider.size)[1] / 2)), self.rotated(self.size)[0])
+            # Note: min(max()) is used instead of Clamp since it is possible that the lower_limit > upper_limit
+            # In this case, the upper limit is seen as more important, since exceeding this limit can result in a crash
         self.value #Flush any _moved arguments, in case they haven't been processed yet.
         if self.orientation % 2: #Update the sliders' size
             if self.slider.height != value:
