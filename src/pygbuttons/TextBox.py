@@ -149,32 +149,33 @@ class TextBox(ButtonBase):
 
 
     def Key_down(self, event):
-        if event.key in (pygame.K_RETURN, pygame.K_ESCAPE):
-            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
-                self._is_selected = False
-        elif event.key == pygame.K_BACKSPACE:
-            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
-                self._text = self._text[:max(self.cursor - 1, 0)] + self._text[self.cursor:]
-            #Move the cursor back one item
-            self.cursor -= 1
-        elif event.key == pygame.K_DELETE:
-            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
-                self._text = self._text[:self.cursor] + self._text[self.cursor + 1:]
-        elif event.key == pygame.K_LEFT:
-            self.cursor -= 1
-        elif event.key == pygame.K_RIGHT:
-            self.cursor += 1
-        elif event.unicode:
-            with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
-                self._text = self._text[:self.cursor] + event.unicode + self._text[self.cursor:]
-            #Scroll the item sideways
-            #self.text_scroll += self.font.size(event.unicode)[0]
-            self.cursor += 1
-        else:
+        if self._is_selected:
+            if event.key in (pygame.K_RETURN, pygame.K_ESCAPE):
+                with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                    self._is_selected = False
+            elif event.key == pygame.K_BACKSPACE:
+                with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                    self._text = self._text[:max(self.cursor - 1, 0)] + self._text[self.cursor:]
+                #Move the cursor back one item
+                self.cursor -= 1
+            elif event.key == pygame.K_DELETE:
+                with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                    self._text = self._text[:self.cursor] + self._text[self.cursor + 1:]
+            elif event.key == pygame.K_LEFT:
+                self.cursor -= 1
+            elif event.key == pygame.K_RIGHT:
+                self.cursor += 1
+            elif event.unicode:
+                with Buttons.Callbacks(True, False), Buttons.Update_flags(True, False):
+                    self._text = self._text[:self.cursor] + event.unicode + self._text[self.cursor:]
+                #Scroll the item sideways
+                #self.text_scroll += self.font.size(event.unicode)[0]
+                self.cursor += 1
+            else:
+                return
+            #Inform Buttons that the input has been processed / used
+            self.Claim_input()
             return
-        #Inform Buttons that the input has been processed / used
-        Buttons.input_processed = True
-        return
 
 
     def Scale(self, scale, relative_scale = True, *, center = (0, 0), px_center = None):
