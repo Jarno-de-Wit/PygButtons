@@ -70,7 +70,7 @@ class Buttons():
                         if button not in lst:
                             lst.append(button)
                 #Else, if the group is already a Button, append that Button to the list instead
-                elif isinstance(grp, Buttons):
+                elif isinstance(grp, ButtonBase):
                     lst.append(grp)
             return lst
         #Select the correct button group
@@ -78,7 +78,7 @@ class Buttons():
             return cls.list_all
         elif group in cls.groups:
             return cls.groups[group] #Return all buttons in the group.
-        elif isinstance(group, Buttons):
+        elif isinstance(group, ButtonBase):
             return [group]
         else: #If the group doesn't exist, return an empty list
             return []
