@@ -1,9 +1,9 @@
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
 import pygame
-from functools import lru_cache
 
 from .Control import Buttons
+from .utils.WeakCache import weak_cache
 
 import math
 
@@ -461,7 +461,7 @@ class ButtonBase():
         return
 
     @staticmethod
-    @lru_cache(10)
+    @weak_cache
     def __get_font(name, size):
         #pygame.font.Font is used in favor of pygame.font.SysFont, as SysFont's font sizes are inconsistent with the value given for the font.
         try:
