@@ -251,7 +251,7 @@ class TextBox(ButtonBase):
         if self._is_selected:
             #Update the cursor animation
             self.cursor_animation = (self.cursor_animation + 1) % Buttons.framerate
-        if self.cursor_animation < round(Buttons.framerate / 2):
+        if self.cursor_animation < Buttons.framerate // 2:
             screen.blit(self.cursor_surface, pos)
         else:
             screen.blit(self.surface, pos)
