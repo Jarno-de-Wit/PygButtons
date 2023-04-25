@@ -307,12 +307,22 @@ class Buttons():
         """
         Processes any KEYDOWN events for buttons which require these.
         """
+        cls.input_claim = False
         cls.input_processed = False
         group_list = cls.get_group(group)
         #If any button in the current scope requires keyboard inputs / has focus:
         if cls._input_lock in group_list:
             if "Key_down" in cls._input_lock.actions:
                 cls._input_lock.Key_down(event)
+                if cls.input_claim:
+                    return
+
+        for button in group_list:
+            #If the button hasn't been processed yet in the input_lock section, and has the "Key_down" attribute:
+            if "Key_down" in button.actions and button is not cls._input_lock:
+                button.Key_down(event)
+                if cls.input_claim:
+                    return
 
     @classmethod
     def Mouse_motion(cls, event, group = all):
