@@ -333,7 +333,8 @@ class Text(ButtonBase):
             lines.append(line_string.rstrip(" "))
         self.__lines = tuple(lines)
 
-        self.text_px_height = len(self.lines) * font_height - self.text.count("\r") * math.ceil(font_height / 2)
+        # Conditional part to account for text sometimes being larger than the font size
+        self.text_px_height = len(self.lines) * font_height - self.text.rstrip("\n\r").count("\r") * math.ceil(font_height / 2) + (self.font.size(self.lines[-1])[1] - font_height if self.lines else 0)
 
         if self.scroll_bar:
             self.scroll_bar.Set_slider_primary(round(self.scroll_bar.height * min(1, (self.height - 2 * self.text_offset[1]) / self.text_px_height)))
