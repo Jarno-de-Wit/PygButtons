@@ -13,7 +13,7 @@ class Button(ButtonBase):
 
     pos: (left, top) - The topleft position before scaling.
     size: (width, height) - The size before scaling.
-    text: str -
+    text: str - The text to be displayed on the Button.
     mode: str - "None": Does not change *.value when clicked. Will set *.clicked and execute any assigned functions.
               - "Count": Count the number of inputs that have occured.
               - "Toggle": Toggle value from True to False and back.
