@@ -219,7 +219,8 @@ class Button(ButtonBase):
                 if self.orientation:
                     text_surface = pygame.transform.rotate(text_surface, -90 * self.orientation)
                 text_rect = text_surface.get_rect()
-                text_rect.height = self.font.get_height()
+                if not "bottom" in self.text_align:
+                    text_rect.height = self.font.get_height()
                 #Align the text properly
                 self.Align(text_rect, limiter_rect, self.text_align)
                 #Blit the text to the limiter surface, and then onto the screen
