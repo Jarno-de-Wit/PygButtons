@@ -56,6 +56,7 @@ class Button(ButtonBase):
                  font_size = 22,
                  text_colour = (0, 0, 0),
                  text_align = "Center",
+                 text_offset = "auto",
                  background = (255, 255, 255),
                  border = ((63, 63, 63), 1, 0),
                  accent_background = (220, 220, 220),
@@ -92,6 +93,18 @@ class Button(ButtonBase):
         else:
             self.accent_bg = self.bg
         self.border = self.Verify_border(border)
+
+        #Set the offset the text has from the sides of the text_box
+        if isinstance(text_offset, int):
+            self.text_offset = 2 * (text_offset,)
+        elif not isinstance(text_offset, str):
+            self.text_offset = self.Verify_iterable(text_offset, 2)
+        elif text_offset.lower() == "auto":
+            #The automatic offset is calculated as 0.25 * font_size + (border_width + border_offset if there is a border)
+            #Offset is not 0 if no border is given, to be consistent with TextBox Buttons
+            #It can of course still be 0 if the user sets text_offset = 0
+            self.text_offset = 2 * (round(self.font_size / 4) + ((self.border[1] + self.border[2]) if self.border else 0),)
+
         self.dragable = self.Verify_iterable(dragable, 2, bool)
         limits = self.Verify_iterable(limits, 4)
         self.limits = list(value if value is not None else ( (-1) ** (i + 1) * math.inf) for i, value in enumerate(limits))
@@ -198,8 +211,8 @@ class Button(ButtonBase):
             #Draw the text onto the surface
             if self.text:
                 #Make a surface that fits within the border
-                text_offset = self.scaled(self.border[1] + self.border[2] + self.font_size / 4 if self.border else self.font_size / 4)
-                text_limiter = pygame.Surface(self.Clamp(self.offset(self.true_size, 2 * (text_offset,), (-2, -2)), 0, math.inf), pygame.SRCALPHA)
+                text_offset = self.scaled(self.text_offset)
+                text_limiter = pygame.Surface(self.Clamp(self.offset(self.true_size, text_offset, (-2, -2)), 0, math.inf), pygame.SRCALPHA)
                 limiter_rect = text_limiter.get_rect()
                 text_surface = self.font.render(self.text, True, self.text_colour)
 
