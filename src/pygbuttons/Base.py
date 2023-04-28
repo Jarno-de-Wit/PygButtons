@@ -190,7 +190,7 @@ class ButtonBase():
         if "top" in pos:
             pass
         elif "bottom" in pos:
-            rect.right = max
+            rect.bottom = max
         else:
             rect.centery = math.floor(max / 2)
 
