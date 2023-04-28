@@ -79,7 +79,7 @@ class Text(ButtonBase):
             #The automatic offset is calculated as 0.25 * font_size + (border_width + border_offset if there is a border)
             #Offset is not 0 if no border is given, to be consistent with TextBox Buttons
             #It can of course still be 0 if the user sets text_offset = 0
-            self.text_offset = 2 * (round(self.font_size / 4) + ((border[1] + border[2]) if self.border else 0),)
+            self.text_offset = 2 * (round(self.font_size / 4) + ((self.border[1] + self.border[2]) if self.border else 0),)
 
         if scroll_bar:
             self.scroll_bar = Make_scroll_bar(self, scroll_bar)
