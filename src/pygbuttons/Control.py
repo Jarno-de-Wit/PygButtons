@@ -56,7 +56,7 @@ class Buttons():
 
 
     @classmethod
-    def get_group(cls, group):
+    def get_group(cls, group, reverse = False):
         """
         Returns all buttons inside the given group / groups.
         """
@@ -72,12 +72,21 @@ class Buttons():
                 #Else, if the group is already a Button, append that Button to the list instead
                 elif isinstance(grp, ButtonBase):
                     lst.append(grp)
-            return lst
+            if reverse:
+                return list(reversed(lst))
+            else:
+                return lst
         #Select the correct button group
         elif group is all: #If the group is the default 'all', return all buttons
-            return cls.list_all
+            if reverse:
+                return list(reversed(cls.list_all))
+            else:
+                return cls.list_all
         elif group in cls.groups:
-            return cls.groups[group] #Return all buttons in the group.
+            if reverse:
+                return list(reversed(cls.groups[group]))
+            else:
+                return cls.groups[group] #Return all buttons in the group.
         elif isinstance(group, ButtonBase):
             return [group]
         else: #If the group doesn't exist, return an empty list
@@ -95,7 +104,7 @@ class Buttons():
             button.Add_to_group(groups)
 
     @classmethod
-    def Event(cls, event, group = all):
+    def Event(cls, event, group = all, reverse = False):
         """
         A method to handle all events a button might need to be informed of.
         """
@@ -108,24 +117,24 @@ class Buttons():
             raise TypeError(f"Event should be type 'Event', not type {type(event).__name__}")
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                cls.LMB_down(event.pos, group)
+                cls.LMB_down(event.pos, group, reverse)
             elif event.button == 2:
-                cls.MMB_down(event.pos, group)
+                cls.MMB_down(event.pos, group, reverse)
             elif event.button == 3:
-                cls.RMB_down(event.pos, group)
+                cls.RMB_down(event.pos, group, reverse)
             elif event.button > 3:
-                cls.Scroll(cls.convert_scroll(event.button), event.pos, group)
+                cls.Scroll(cls.convert_scroll(event.button), event.pos, group, reverse)
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
-                cls.LMB_up(event.pos, group)
+                cls.LMB_up(event.pos, group, reverse)
             elif event.button == 2:
-                cls.MMB_up(event.pos, group)
+                cls.MMB_up(event.pos, group, reverse)
             elif event.button == 3:
-                cls.RMB_up(event.pos, group)
+                cls.RMB_up(event.pos, group, reverse)
         elif event.type == pygame.KEYDOWN:
-            cls.Key_down(event, group)
+            cls.Key_down(event, group, reverse)
         elif event.type == pygame.MOUSEMOTION:
-            cls.Mouse_motion(event, group)
+            cls.Mouse_motion(event, group, reverse)
 
 
     @classmethod
@@ -142,13 +151,13 @@ class Buttons():
 
 
     @classmethod
-    def LMB_down(cls, pos, group = all):
+    def LMB_down(cls, pos, group = all, reverse = False):
         """
         Left Mouse Button down; A.K.A. a normal click.
         """
         cls.input_claim = False
         cls.input_processed = False
-        group_list = cls.get_group(group)
+        group_list = cls.get_group(group, reverse)
 
         #If a button has claimed an input lock
         if cls._input_lock in group_list:
@@ -165,13 +174,13 @@ class Buttons():
 
 
     @classmethod
-    def LMB_up(cls, pos, group = all):
+    def LMB_up(cls, pos, group = all, reverse = False):
         """
         Left Mouse Button up; A.K.A. releasing a click.
         """
         cls.input_claim = False
         cls.input_processed = False
-        group_list = cls.get_group(group)
+        group_list = cls.get_group(group, reverse)
 
         #If a button has claimed an input lock
         if cls._input_lock in group_list:
@@ -188,13 +197,13 @@ class Buttons():
 
 
     @classmethod
-    def RMB_down(cls, pos, group = all):
+    def RMB_down(cls, pos, group = all, reverse = False):
         """
         Right Mouse Button down.
         """
         cls.input_claim = False
         cls.input_processed = False
-        group_list = cls.get_group(group)
+        group_list = cls.get_group(group, reverse)
 
         #If a button has claimed an input lock
         if cls._input_lock in group_list:
@@ -211,13 +220,13 @@ class Buttons():
 
 
     @classmethod
-    def RMB_up(cls, pos, group = all):
+    def RMB_up(cls, pos, group = all, reverse = False):
         """
         Right Mouse Button up.
         """
         cls.input_claim = False
         cls.input_processed = False
-        group_list = cls.get_group(group)
+        group_list = cls.get_group(group, reverse)
 
         #If a button has claimed an input lock
         if cls._input_lock in group_list:
@@ -234,13 +243,13 @@ class Buttons():
 
 
     @classmethod
-    def MMB_down(cls, pos, group = all):
+    def MMB_down(cls, pos, group = all, reverse = False):
         """
         Middle Mouse Button down.
         """
         cls.input_claim = False
         cls.input_processed = False
-        group_list = cls.get_group(group)
+        group_list = cls.get_group(group, reverse)
 
         #If a button has claimed an input lock
         if cls._input_lock in group_list:
@@ -257,13 +266,13 @@ class Buttons():
 
 
     @classmethod
-    def MMB_up(cls, pos, group = all):
+    def MMB_up(cls, pos, group = all, reverse = False):
         """
         Middle Mouse Button up.
         """
         cls.input_claim = False
         cls.input_processed = False
-        group_list = cls.get_group(group)
+        group_list = cls.get_group(group, reverse)
 
         #If a button has claimed an input lock
         if cls._input_lock in group_list:
@@ -280,13 +289,13 @@ class Buttons():
 
 
     @classmethod
-    def Scroll(cls, value, pos, group):
+    def Scroll(cls, value, pos, group = all, reverse = False):
         """
         Handles all scroll events for all buttons.
         """
         cls.input_claim = False
         cls.input_processed = False
-        group_list = cls.get_group(group)
+        group_list = cls.get_group(group, reverse)
 
         if cls._input_lock in group_list:
             if "Scroll" in cls._input_lock.actions:
@@ -303,13 +312,13 @@ class Buttons():
 
 
     @classmethod
-    def Key_down(cls, event, group = all):
+    def Key_down(cls, event, group = all, reverse = False):
         """
         Processes any KEYDOWN events for buttons which require these.
         """
         cls.input_claim = False
         cls.input_processed = False
-        group_list = cls.get_group(group)
+        group_list = cls.get_group(group, reverse)
         #If any button in the current scope requires keyboard inputs / has focus:
         if cls._input_lock in group_list:
             if "Key_down" in cls._input_lock.actions:
@@ -325,12 +334,12 @@ class Buttons():
                     return
 
     @classmethod
-    def Mouse_motion(cls, event, group = all):
+    def Mouse_motion(cls, event, group = all, reverse = False):
         """
         Updates the cursor position. Required for e.g. sliders.
         Only active for the button which currently holds the _input_lock to prevent excessive function call overhead.
         """
-        group_list = cls.get_group(group)
+        group_list = cls.get_group(group, reverse)
         if cls._input_lock in group_list:
             if "Mouse_motion" in cls._input_lock.actions:
                 cls._input_lock.Mouse_motion(event)
@@ -435,14 +444,14 @@ class Buttons():
 
 
     @classmethod
-    def Draw(cls, screen, group = all):
+    def Draw(cls, screen, group = all, reverse = True):
         """
         Draw all buttons in the specified group to the screen / Surface provided.
         """
         #Select the correct button group
-        group_list = cls.get_group(group)
+        group_list = cls.get_group(group, reverse)
         #Click all buttons without the "Cursor Lock".
-        for button in reversed(group_list):
+        for button in group_list:
             if button is not cls._input_lock:
                 button.Draw(screen)
         #Draw the button with the "Input Lock" last, to make it always appear on top.
