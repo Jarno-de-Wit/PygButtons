@@ -372,9 +372,9 @@ class Buttons():
         if value < 4:
             return 0
         elif value % 2:
-            return round((value - 2) / 2) * cls.scroll_factor
+            return round((value - 3) / 2) * cls.scroll_factor
         else:
-            return round(-(value - 3) / 2) * cls.scroll_factor
+            return round(-(value - 2) / 2) * cls.scroll_factor
 
 
     @classmethod
