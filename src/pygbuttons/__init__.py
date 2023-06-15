@@ -1,6 +1,6 @@
 __all__ = ["Buttons", "ButtonBase", "Button", "TextBox", "Slider", "DropdownBox", "Text"]
 
-__version__ = "0.9.3"
+__version__ = "0.9.4"
 __version_info__ = tuple(map(int, __version__.split(".")))
 
 #Import all items so they are all actually loaded
