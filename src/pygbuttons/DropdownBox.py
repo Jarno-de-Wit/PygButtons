@@ -204,6 +204,9 @@ class DropdownBox(ButtonBase):
         #Note: Setting .state, since this by default has callbacks and flags disabled
         self.state = -1
         #Lock is automatically released in property setter
+        # Reset scroll_bar to initial position if present
+        if self.scroll_bar:
+            self.scroll_bar.Clear()
 
 
     def Draw(self, screen, pos = None):

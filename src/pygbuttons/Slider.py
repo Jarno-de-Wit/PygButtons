@@ -178,6 +178,7 @@ class Slider(ButtonBase):
         with Buttons.Callbacks(False, False), Buttons.Update_flags(False, False):
             self.value = self.start_value
             self.is_selected = False
+            self.slider.Deselect()
         #Lock is automatically released in property setter
 
 

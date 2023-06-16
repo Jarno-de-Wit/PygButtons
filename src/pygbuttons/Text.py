@@ -142,6 +142,8 @@ class Text(ButtonBase):
         self.scrolled = 0
         self.Release_lock()
         #Does not do anything to the contained text, since that is not created directly through user input.
+        if self.scroll_bar:
+            self.scroll_bar.Deselect()
 
 
     def Draw(self, screen, pos = None):
