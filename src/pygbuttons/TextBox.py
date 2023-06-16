@@ -191,6 +191,10 @@ class TextBox(ButtonBase):
         self.is_selected = False
         #Lock is automatically released in property setter
 
+    def Deselect(self):
+        self.is_selected = False
+        # Lock is automatically released in is_selected property setter
+
 
     def Draw(self, screen, pos = None):
         """

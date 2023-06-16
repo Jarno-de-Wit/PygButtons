@@ -208,6 +208,13 @@ class DropdownBox(ButtonBase):
         if self.scroll_bar:
             self.scroll_bar.Clear()
 
+    def Deselect(self):
+        self.is_selected = False
+        # Lock is automatically released in is_selected property setter
+        # Reset scrollbar to initial position if present
+        if self.scroll_bar:
+            self.scroll_bar.Clear()
+
 
     def Draw(self, screen, pos = None):
         """

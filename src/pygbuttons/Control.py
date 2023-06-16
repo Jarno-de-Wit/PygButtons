@@ -442,6 +442,16 @@ class Buttons():
         for button in cls.get_group(group):
             button.Clear()
 
+    @classmethod
+    def Deselect(cls, group = all):
+        """
+        Deselects all buttons in the given group.
+
+        group: * - The group of Buttons which should be deselected
+        """
+        for button in cls.get_group(group):
+            button.Deselect()
+
 
     @classmethod
     def Draw(cls, screen, group = all, reverse = True):

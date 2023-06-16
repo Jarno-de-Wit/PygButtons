@@ -194,6 +194,12 @@ class Button(ButtonBase):
         self.value = 0 if self.mode.lower() == "count" else False
         self.Release_lock()
 
+    def Deselect(self):
+        # If mode is "hold" or "toggle", ensure the button is not selected
+        if self.mode.lower() != "count":
+            self.value = False
+        self.Release_lock()
+
 
     def Draw(self, screen, pos = None):
         """

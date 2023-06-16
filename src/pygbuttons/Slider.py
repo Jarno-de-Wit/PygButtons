@@ -181,6 +181,12 @@ class Slider(ButtonBase):
             self.slider.Deselect()
         #Lock is automatically released in property setter
 
+    def Deselect(self):
+        # While preventing flags from being set, deselect the slider
+        with Buttons.Update_flags(False, False):
+            self.is_selected = False
+            self.slider.Deselect()
+
 
     def Draw(self, screen, pos = None):
         """

@@ -145,6 +145,11 @@ class Text(ButtonBase):
         if self.scroll_bar:
             self.scroll_bar.Deselect()
 
+    def Deselect(self):
+        self.Release_lock()
+        if self.scroll_bar:
+            self.scroll_bar.Deselect()
+
 
     def Draw(self, screen, pos = None):
         """
