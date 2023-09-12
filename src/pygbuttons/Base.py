@@ -87,6 +87,14 @@ class ButtonBase():
             if grp not in self.groups:
                 self.groups.append(grp)
 
+    def Delete(self):
+        for group in self.groups:
+            if self in Buttons.groups[group]:
+                Buttons.groups[group].remove(self)
+        self.groups.clear()
+        if not self.independent and self in Buttons.list_all:
+            Buttons.list_all.remove(self)
+
     def Set_lock(self, claim = True):
         """
         Set the input lock (if possible).
