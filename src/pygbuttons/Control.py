@@ -133,6 +133,8 @@ class Buttons():
                 cls.RMB_up(event.pos, group, reverse)
         elif event.type == pygame.KEYDOWN:
             cls.Key_down(event, group, reverse)
+        elif event.type == pygame.KEYUP:
+            cls.Key_up(event, group, reverse)
         elif event.type == pygame.MOUSEMOTION:
             cls.Mouse_motion(event, group, reverse)
 
@@ -330,6 +332,28 @@ class Buttons():
             #If the button hasn't been processed yet in the input_lock section, and has the "Key_down" attribute:
             if "Key_down" in button.actions and button is not cls._input_lock:
                 button.Key_down(event)
+                if cls.input_claim:
+                    return
+
+    @classmethod
+    def Key_up(cls, event, group = all, reverse = False):
+        """
+        Processes any KEYDOWN events for buttons which require these.
+        """
+        cls.input_claim = False
+        cls.input_processed = False
+        group_list = cls.get_group(group, reverse)
+        #If any button in the current scope requires keyboard inputs / has focus:
+        if cls._input_lock in group_list:
+            if "Key_up" in cls._input_lock.actions:
+                cls._input_lock.Key_up(event)
+                if cls.input_claim:
+                    return
+
+        for button in group_list:
+            #If the button hasn't been processed yet in the input_lock section, and has the "Key_up" attribute:
+            if "Key_up" in button.actions and button is not cls._input_lock:
+                button.Key_up(event)
                 if cls.input_claim:
                     return
 
