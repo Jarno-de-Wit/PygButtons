@@ -1,5 +1,6 @@
 from .Base import ButtonBase
 from .Control import Buttons
+from .utils import align
 
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
@@ -228,7 +229,7 @@ class Button(ButtonBase):
                 if not "bottom" in self.text_align:
                     text_rect.height = self.font.get_height()
                 #Align the text properly
-                self.Align(text_rect, limiter_rect, self.text_align)
+                align(text_rect, limiter_rect, self.text_align)
                 #Blit the text to the limiter surface, and then onto the screen
                 text_limiter.blit(text_surface, text_rect)
                 limiter_rect.center = self.middle

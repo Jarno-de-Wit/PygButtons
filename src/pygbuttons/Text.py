@@ -1,6 +1,7 @@
 from .Base import ButtonBase
 from .Control import Buttons
 from .Slider import Slider
+from .utils import alignX, alignY
 
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
@@ -170,7 +171,7 @@ class Text(ButtonBase):
             font_height = self.font.get_height()
             if self.px_height >= self.text_px_height:
                 #If the text fully fits within the available space, calculate the vertical offset to get the right alignment
-                vert_offset = self.AlignY(self.text_px_height, self.px_height, self.text_align).top
+                vert_offset = alignY(self.text_px_height, self.px_height, self.text_align).top
             else:
                 #If the text requires scrolling, vertical alignment doesn't matter anymore (all vertical alignment is taken over by the scrolled value)
                 vert_offset = 0
@@ -183,7 +184,7 @@ class Text(ButtonBase):
                 line_rect = line_surf.get_rect()
                 line_rect.top = vert_offset
                 vert_offset += font_height if not line.endswith("\r") else font_height // 2
-                line_rect = self.AlignX(line_rect, self.px_width, self.text_align)
+                line_rect = alignX(line_rect, self.px_width, self.text_align)
                 self.text_surface.blit(line_surf, line_rect)
 
             self.updated = False

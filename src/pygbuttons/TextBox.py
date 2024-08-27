@@ -1,5 +1,6 @@
 from .Base import ButtonBase
 from .Control import Buttons
+from .utils import alignX, alignY
 
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = ""
@@ -115,7 +116,7 @@ class TextBox(ButtonBase):
                     #the position at which the user clicked
                     text_width = self.font.size(self._text)[0]
                     if text_width < self.true_width - 2 * self.scaled(self.text_offset[0]):
-                        pixel_offset = self.AlignX(text_width, self.true_width - 2 * self.scaled(self.text_offset[0]) - 1, self.text_align).left + self.scaled(self.text_offset[0])
+                        pixel_offset = alignX(text_width, self.true_width - 2 * self.scaled(self.text_offset[0]) - 1, self.text_align).left + self.scaled(self.text_offset[0])
                     else:
                         pixel_offset = - self.text_scroll + self.scaled(self.text_offset[0])
                     for letter_nr, letter in enumerate(self._text):
@@ -225,12 +226,12 @@ class TextBox(ButtonBase):
             else:
                 text_surface = self.font.render(self.hint, True, self.hint_colour)
             #Align the text rect
-            text_rect = self.AlignY(self.font.get_height(), limiter_rect, self.text_align)
+            text_rect = alignY(self.font.get_height(), limiter_rect, self.text_align)
             text_rect.width = text_surface.get_width()
             if text_rect.width < limiter_rect.width:
                 #If the text is smaller than the limiter, perform alignment in the X direction
                 #Available width -= 1 to account for the cursor potentially being on the right side of the text
-                self.AlignX(text_rect, limiter_rect.width - 1, self.text_align)
+                alignX(text_rect, limiter_rect.width - 1, self.text_align)
             else:
                 #If the text is wider than the limiter, all alignment is taken care of inside text_scroll
                 text_rect.left = - self.text_scroll
@@ -244,7 +245,7 @@ class TextBox(ButtonBase):
             #Align cursor vertically
             cursor_rect.centery = text_rect.centery
             #Align cursor horizontally. (if-else statement is required to prevent the hint from changing the Cursor location.)
-            cursor_rect.left = self.font.size(self._text[:self.cursor])[0] + (text_rect.left if self._text else self.AlignX(cursor_rect.width, limiter_rect, self.text_align).left)
+            cursor_rect.left = self.font.size(self._text[:self.cursor])[0] + (text_rect.left if self._text else alignX(cursor_rect.width, limiter_rect, self.text_align).left)
             #Draw the cursor to the text limiter
             pygame.draw.rect(text_limiter, self.text_colour,  cursor_rect)
             self.cursor_surface.blit(text_limiter, limiter_rect)
