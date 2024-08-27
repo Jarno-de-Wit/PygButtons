@@ -27,6 +27,7 @@ class ButtonBase():
     *.get_rect() - Get a pygame.Rect object for the Button.
     *.get_scaled_rect() - Get a pygame.Rect object for the Button at its current scale.
     *.Add_to_group(group) - Add the Button on which this is called to the given group(s).
+    *.Remove_from_group(group) - Removes the Button on which this function is called from the provided group(s).
     """
     #Flags determining whether callbacks should be made and update_flags should be set.
     #Can be set using Buttons.Callbacks() and Buttons.Update_flags()
@@ -86,6 +87,15 @@ class ButtonBase():
             #Track the joined groups in the buttons' own groups list
             if grp not in self.groups:
                 self.groups.append(grp)
+
+    def Remove_from_group(self, groups):
+        if not isinstance(groups, (list, tuple)):
+            groups = [groups]
+        for grp in groups:
+            if grp in self.groups:
+                self.groups.remove(grp)
+            if self in Buttons.groups[grp]:
+                Buttons.groups[grp].remove(self)
 
     def Delete(self):
         for group in self.groups:
